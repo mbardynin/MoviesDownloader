@@ -1,0 +1,31 @@
+{
+  "name": "movies-downloader.service",
+  "version": "1.0.0.0",
+  "description": "MoviesDownloader",
+  "main": "bin/app.js",
+  "author": {
+    "name": "Bardynin Mikhail"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "cheerio": "^0.22.0",
+    "config": "^1.26.2",
+    "express": "^4.15.2",
+    "filesize-parser": "^1.4.1",
+    "iconv-lite": "^0.4.15",
+    "node-telegram-bot-api": "^0.27.0",
+    "proxy-lists": "^1.11.1",
+    "proxy-verifier": "^0.4.0",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.3",
+    "rutracker-api": "^0.2.0",
+    "transmission-client": "^0.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.8",
+    "typescript": "^2.2.1"
+  },
+  "engines": {
+    "node": "7.7.3"
+  }
+}

@@ -1,0 +1,32 @@
+{
+    "transmissionSettings": {
+      "host": "1.1.1.1",
+      "username": "transmissionUser",
+      "password": "transmissionPassword",
+      "ssl": true,
+      "port": 443
+    },
+    "torrentTrackerSettings": {
+        "rutrackerSettings": {
+            "login": "login",
+            "password": "password"
+        }
+    },
+    "kinopoiskSettings": {
+        "getmovieCcApiKey": "apiKey",
+        "credentials": {
+            "login": "login",
+            "password": "password"
+        }
+    },
+    "telegramBotSettings": {
+        "token": "token",
+        "allowedChats": [1, 2, -3]
+    },
+    "port": 1337,
+
+    "allowedGoogleAccounts": [
+        "aaa@gmail.com"
+        // ,"any"
+    ]
+  }
