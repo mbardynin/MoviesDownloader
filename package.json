@@ -1,8 +1,13 @@
 {
-  "name": "movies-downloader.service",
-  "version": "1.0.0.0",
-  "description": "MoviesDownloader",
+  "name": "movies-downloader",
+  "version": "1.0.0",
+  "description": "web service and telegram bot for downloading movies from torrent tracker",
   "main": "bin/app.js",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/maestroMike/MoviesDownloader"
+  },
+  "readme": "README.md",
   "author": {
     "name": "Bardynin Mikhail"
   },
@@ -23,6 +28,8 @@
   },
   "devDependencies": {
     "@types/node": "^7.0.8",
+    "gulp": "^3.9.1",
+    "gulp-zip": "^4.0.0",
     "typescript": "^2.2.1"
   },
   "engines": {
