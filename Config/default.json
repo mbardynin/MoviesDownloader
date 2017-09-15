@@ -26,7 +26,7 @@
     "port": 1337,
 
     "allowedGoogleAccounts": [
-        "aaa@gmail.com"
-        // ,"any"
+        "aaa@gmail.com",
+        "any"
     ]
   }
