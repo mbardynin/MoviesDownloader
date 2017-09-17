@@ -4,12 +4,13 @@ let app = express();
 
 export class Server {
 	startListening() {
-		app.listen(servicesReporitory.config.port, (err) => {
+		let port = process.env.port || servicesReporitory.config.port;
+		app.listen(port, (err) => {
 			if (err) {
 				return console.log(err)
 			}
 
-			return console.log(`server is listening on ${servicesReporitory.config.port}`)
+			return console.log(`server is listening on ${port}`)
 		});
 	}
 
