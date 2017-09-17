@@ -18,20 +18,12 @@ gulp.task('default', function () {
         '!**/_package/**',
         '!**/typings/**',
         '!**/src/**',
+        '!**/node_modules/**',
         '!typings',
         '!_package',
+        '!src',
+        '!node_modules',
         '!gulpfile.js']
-
-    //add exclusion patterns for all dev dependencies
-    var packageJSON = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
-    var devDeps = packageJSON.devDependencies;
-
-    for (var propName in devDeps) {
-        var excludePattern1 = "!**/node_modules/" + propName + "/**";
-        var excludePattern2 = "!**/node_modules/" + propName;
-        packagePaths.push(excludePattern1);
-        packagePaths.push(excludePattern2);
-    }
 
     return gulp.src(packagePaths)
         .pipe(zip(options.packageName))
