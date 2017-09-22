@@ -11,6 +11,11 @@ export class MoviesDownloaderTelegramBot {
 		this.options = options;
 	}
 
+	// WebHook
+	processUpdate(messageBody) {
+		this.bot.processUpdate(messageBody);
+	}
+
 	sendMessage(chatId: number, message: string) {
 		this.bot.sendMessage(chatId, message, this.createSendMessageOptions());
 	}
@@ -25,7 +30,18 @@ export class MoviesDownloaderTelegramBot {
 
 	activate() {
 		const self = this;
-		this.bot = new TelegramBot(this.options.token, { polling: true });
+
+		if (this.options.useWebHooks) 
+		{
+			this.bot = new TelegramBot(this.options.token);
+			// callback routing configured in server.ts
+			this.bot.setWebHook(`${this.options.webHooksBaseUrl}/bot${this.options.token}`); 
+		}
+		else
+		{
+			this.bot = new TelegramBot(this.options.token, { polling: true });
+		}
+
 		this.bot.onText(/\/echo (.+)/, (msg, match) => {
 			const chatId = msg.chat.id;
 			const resp = match[1];

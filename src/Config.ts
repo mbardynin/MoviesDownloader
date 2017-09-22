@@ -24,6 +24,8 @@ export interface IKinopoiskWrapperSettings {
 export interface ITelegramBotSettings {
 	token: string;
 	allowedChats: number[];
+	useWebHooks: boolean;
+	webHooksBaseUrl: string;
 }
 
 export interface ITransmissionSettings {

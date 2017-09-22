@@ -1,6 +1,7 @@
 ﻿import { servicesReporitory } from "./ServiceLocator"
 let express = require("express");
 let app = express();
+let bodyParser = require('body-parser');
 
 export class Server {
 	startListening() {
@@ -16,6 +17,14 @@ export class Server {
 
 	defineRoutes() {
 		const self = this;
+		
+		// WebHook for bot
+        app.use(bodyParser.json());
+        app.post(`/bot${servicesReporitory.config.telegramBotSettings.token}`, (req, res) => {
+          servicesReporitory.telegramBot.processUpdate(req.body);
+          res.sendStatus(200);
+		});
+		
 		app.get("/", (req, res) => {
 			if (!self.checkPrincipal(req)) {
 				res.sendStatus(403);

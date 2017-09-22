@@ -21,7 +21,9 @@
     },
     "telegramBotSettings": {
         "token": "token",
-        "allowedChats": [1, 2, -3]
+        "allowedChats": [1, 2, -3],
+	    "useWebHooks": true,
+	    "webHooksBaseUrl": "https://mysite.net"
     },
     "port": 1337,
 
