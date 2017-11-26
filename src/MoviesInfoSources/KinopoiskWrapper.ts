@@ -1,6 +1,6 @@
 ﻿import { getById as kinopoiskGetFilmById } from "./kinopoisk"
-let request = require("request-promise-native");
 import { IKinopoiskWrapperSettings } from "./../Config"
+import { servicesReporitory } from "./../ServiceLocator"
 
 export class KinopoiskWrapper {
 	private options: IKinopoiskWrapperSettings;
@@ -9,14 +9,27 @@ export class KinopoiskWrapper {
 
 	async getById(kinopoiskId: number): Promise<IKinopoiskMovieInfo> {
 		try {
-			return await this.getFilmInfoFromGetmovie(kinopoiskId);
+			var movieInfo = await servicesReporitory.googleSearchOnKinopoisk.getMovieInfoById(kinopoiskId);
+			
+			if(!movieInfo){
+				console.log('Fall back to kinopoisk search.');
+				return await this.getByIdFromKinopoisk(kinopoiskId);
+			}
+
+			let mappedFilmInfo: IKinopoiskMovieInfo = {
+				title: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(movieInfo.alternativeTitle) ? movieInfo.alternativeTitle : movieInfo.title,
+				year: movieInfo.year,
+				director: ""
+				//director: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(film.director[0]) ? film.director[0] : ""
+			};
+			return mappedFilmInfo;
 		} catch (e) {
 			console.error(e);
 			return await this.getByIdFromKinopoisk(kinopoiskId);
 		} 
 	}
 
-	async getByIdFromKinopoisk(kinopoiskId: number): Promise<IKinopoiskMovieInfo> {
+	private async getByIdFromKinopoisk(kinopoiskId: number): Promise<IKinopoiskMovieInfo> {
 		return new Promise<IKinopoiskMovieInfo>((resolve, reject) => {
 			kinopoiskGetFilmById(kinopoiskId, this.GetOptions(),  (err, film) => {
 				if (err) {
@@ -32,28 +45,6 @@ export class KinopoiskWrapper {
 				}
 			});
 		});
-	}
-
-	private async getFilmInfoFromGetmovie(kinopoiskId: number): Promise<IKinopoiskMovieInfo> {
-		// docs: http://getmovie.cc/api-kinopoisk.html
-		const options = {
-			uri: 'http://getmovie.cc/api/kinopoisk.json',
-			qs: {
-				id: kinopoiskId,
-				token: this.options.getmovieCcApiKey // -> uri + '?token=xxxxx%20xxxxx' 
-			},
-			json: true // Automatically parses the JSON string in the response 
-		};
-
-		const res = await request(options);
-
-		console.info(`Film info ${kinopoiskId} loaded from getmovie.cc`);
-		return {
-			title: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(res.name_en) ? res.name_en : res.name_ru,
-			year: res.year,
-			director: ""
-			//director: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(res.creators.director[0].name_person_en) ? res.creators.director[0].name_person_en : res.creators.director[0].name_person_ru
-		};
 	}
 
 	private isStringNotEmptyAndHasJustLatinAndCyrilicChars(str: string): boolean {

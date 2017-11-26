@@ -53,34 +53,12 @@ export class MoviesDownloaderTelegramBot {
 			this.bot.sendMessage(chatId, chatId);
 		});
 
-		this.bot.onText(/http[s]*:\/\/www.kinopoisk.ru\/film\/(\d+)/,
-			async (msg, match) => {
-				const chatId = msg.chat.id;
+		this.bot.onText(/http[s]*:\/\/www.kinopoisk.ru\/film\/(\d+)/, 
+			async (msg, match) => await this.processMovie(msg, match, self));
 
-				// check permissions
-				if (!self.isAllowedChat(chatId)) {
-					this.bot.sendMessage(chatId, "You have not permissions for downloading movies.");
-					return;
-				}
+		this.bot.onText(/http[s]*:\/\/www.kinopoisk.ru\/film\/[\w\d-]*-(\d+)/, 
+			async (msg, match) => await this.processMovie(msg, match, self));
 
-				const filmId = match[1];
-				try {
-					const rutrackerResults = await servicesReporitory.moviesDownloaderService.GetApplicableTorrents(filmId);
-					if (rutrackerResults.length === 0) {
-						this.bot.sendMessage(chatId, "Appropriate torrents on torrent trackers don't found.");
-						return;
-					}
-
-					const message = self.createDownloadMessage(rutrackerResults);
-					const keyboard = self.createDownloadMessageKeyboard(rutrackerResults);
-					const opts = self.createSendMessageOptions(keyboard);
-					this.bot.sendMessage(chatId, message, opts);
-					
-				} catch (e) {
-					this.bot.sendMessage(chatId, `Unable to find appropriate torrents. Reason: ${e.message}`);
-				} 
-		});
-		
 		this.bot.on('callback_query', async callbackQuery => {
 			const callbackData = CallbackData.parse(callbackQuery.data);
 			const msg = callbackQuery.message;
@@ -101,6 +79,32 @@ export class MoviesDownloaderTelegramBot {
 		});
 		
 		return console.log(`bot is activated`)
+	}
+
+	private async processMovie(msg, match, self: this) {			
+		const chatId = msg.chat.id;
+		// check permissions
+		if (!this.isAllowedChat(chatId)) {
+			this.bot.sendMessage(chatId, "You have not permissions for downloading movies.");
+			return;
+		}
+
+		const filmId = match[1];	
+		try {
+			const rutrackerResults = await servicesReporitory.moviesDownloaderService.GetApplicableTorrents(filmId);
+			if (rutrackerResults.length === 0) {
+				this.bot.sendMessage(chatId, "Appropriate torrents on torrent trackers don't found.");
+				return;
+			}
+
+			const message = this.createDownloadMessage(rutrackerResults);
+			const keyboard = this.createDownloadMessageKeyboard(rutrackerResults);
+			const opts = this.createSendMessageOptions(keyboard);
+			this.bot.sendMessage(chatId, message, opts);
+			
+		} catch (e) {
+			this.bot.sendMessage(chatId, `Unable to find appropriate torrents. Reason: ${e.message}`);
+		} 
 	}
 	
 	private cancelCalback(callbackId, chatId, message) {

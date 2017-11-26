@@ -2,6 +2,7 @@
 	transmissionSettings: ITransmissionSettings;
     torrentTrackerSettings: ITorrentTrackersManagerSettings;
 	kinopoiskSettings: IKinopoiskWrapperSettings;
+	googleSearchOnSettings: IGoogleSearchOnKinopoiskSettings;
 	telegramBotSettings: ITelegramBotSettings;
 	port: number;
 	allowedGoogleAccounts: string[];
@@ -18,7 +19,11 @@ export interface ILoginPassword {
 
 export interface IKinopoiskWrapperSettings {
 	credentials: ILoginPassword;
-	getmovieCcApiKey: string;
+}
+
+export interface IGoogleSearchOnKinopoiskSettings {
+	apiKey: ILoginPassword;
+	customSearchId: string;
 }
 
 export interface ITelegramBotSettings {

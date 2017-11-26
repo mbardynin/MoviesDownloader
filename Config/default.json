@@ -13,11 +13,14 @@
         }
     },
     "kinopoiskSettings": {
-        "getmovieCcApiKey": "apiKey",
         "credentials": {
             "login": "login",
             "password": "password"
         }
+    },
+    "googleSearchOnSettings": {
+        "apiKey":"apiKey",
+        "customSearchId":"customSearchId"
     },
     "telegramBotSettings": {
         "token": "token",
