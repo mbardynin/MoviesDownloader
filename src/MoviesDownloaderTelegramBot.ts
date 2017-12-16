@@ -112,26 +112,26 @@ export class MoviesDownloaderTelegramBot {
 	}
 	
 	private cancelCalback(callbackId, chatId, message) {
-		this.bot.editMessageText("Action is canceled.", { chat_id: chatId, message_id: message.message_id });
+		this.editMessage(chatId, message.message_id, "Action is canceled.")
 	}
 
 	private async downloadCalback(callbackId, chatId, message, torrentTrackerId: string) {
 		try {
 			const addTorrentResult = await servicesReporitory.moviesDownloaderService.AddTorrent(torrentTrackerId);
 
-			this.bot.editMessageText(`Started Downloading of torrent '${addTorrentResult.name}'.`, { chat_id: chatId, message_id: message.message_id });
+			this.editMessage(chatId, message.message_id, `Started Downloading of torrent '${addTorrentResult.name}'.`)
 			await servicesReporitory.torrentStatusManager.addActiveTorrent(addTorrentResult.hashString, chatId, message.message_id);
 		} catch (e) {
-			this.bot.editMessageText(`Unable to download torrent ${torrentTrackerId}. Reason: ${e.message}`, { chat_id: chatId, message_id: message.message_id });
+			this.editMessage(chatId, message.message_id, `Unable to download torrent ${torrentTrackerId}. Reason: ${e.message}`)
 		} 
 	}
 
 	private async removeTorrentCalback(callbackId, chatId, message, torrentHash: string) {
 		try {
 			await servicesReporitory.transmissionClient.remove(torrentHash, true);
-			this.bot.editMessageText(`Torrent removed`, { chat_id: chatId, message_id: message.message_id });
+			this.editMessage(chatId, message.message_id, "Torrent is removed.")
 		} catch (e) {
-			this.bot.editMessageText(`Unable to remove torrent with hash ${torrentHash}. Reason: ${e.message}`, { chat_id: chatId, message_id: message.message_id });
+			this.editMessage(chatId, message.message_id, `Unable to remove torrent with hash ${torrentHash}. Reason: ${e.message}`)
 		}
 	}
 
