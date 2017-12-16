@@ -17,7 +17,7 @@ export class MoviesDownloaderTelegramBot {
 	}
 
 	editMessage(chatId: number, messageId: number, message: string) {
-		this.bot.editMessageText(message, { chat_id: chatId, message_id: messageId });
+		this.bot.editMessageText(message, { chat_id: chatId, message_id: messageId, parse_mode: "HTML" });
 	}
 
 	deleteMessage(chatId: number, messageId: number) {
@@ -174,14 +174,19 @@ export class MoviesDownloaderTelegramBot {
 		return opts;
 	}
 
-	private createOptions(keyboard) {
-		return {
-			reply_markup: {
-				inline_keyboard: keyboard
-			},
+	private createOptions(keyboard = null) {
+		var res = {
+			reply_markup: null,
 			disable_web_page_preview: true,
 			parse_mode: "HTML"
 		};
+
+		if (keyboard) {
+			res.reply_markup = {
+					inline_keyboard: keyboard
+				};
+		}
+		return res;
 	}
 
 	private isAllowedChat(id: number): boolean {

@@ -22,7 +22,7 @@ export class TorrentStatusManager {
 			const activeTorrent = self.activeTorrents[activeTorrentIndex];
 			if (status !== "SEED_WAIT" && status !== "SEED") {
 				// downloading is in progress. Report status.
-				const message = `Started downloading of torrent '${torrent.name}'. Status: ${status}, Progress: ${torrent.percentDone}%, Peers: ${torrent.peersConnected}`;
+				const message = `[${status} - <b>${torrent.percentDone * 100}%</b> - ${torrent.peersConnected} peers] Started downloading of torrent <i>'${torrent.name}'</i>.`;
 				servicesReporitory.telegramBot.editMessage(activeTorrent.chatId, activeTorrent.messageId, message);
 				continue;
 			}
