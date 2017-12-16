@@ -29,7 +29,7 @@ export class TorrentStatusManager {
 
 			// send message
 			servicesReporitory.telegramBot.deleteMessage(activeTorrent.chatId, activeTorrent.messageId);
-			servicesReporitory.telegramBot.sendMessageTorrentDownloaded(activeTorrent.chatId, `Download completed. Do you want to <b>delete</b> '${torrent.name}'?`, torrent.hashString);
+			servicesReporitory.telegramBot.sendMessageTorrentDownloaded(activeTorrent.chatId, `Downloading of '${torrent.name}' is completed. Do you want to <b>delete</b> it?`, torrent.hashString);
 			// remove from list
 			self.activeTorrents.splice(activeTorrentIndex, 1);
 		}
