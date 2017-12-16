@@ -12,24 +12,24 @@
     "name": "Bardynin Mikhail"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
     "cheerio": "^0.22.0",
-    "config": "^1.26.2",
-    "express": "^4.15.2",
+    "config": "^1.28.1",
+    "express": "^4.16.2",
     "filesize-parser": "^1.4.1",
     "googleapis": "^23.0.0",
     "iconv-lite": "^0.4.15",
-    "node-telegram-bot-api": "^0.27.0",
-    "request": "^2.81.0",
+    "node-telegram-bot-api": "^0.29.0",
+    "request": "^2.83.0",
     "rutracker-api": "^0.2.0",
-    "transmission-client": "^0.4.4"
+    "transmission-client": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^7.0.8",
+    "@types/node": "^7.0.50",
     "gulp": "^3.9.1",
     "gulp-zip": "^4.0.0",
-    "typescript": "^2.2.1"
+    "typescript": "^2.6.2"
   },
   "engines": {
     "node": "7.7.4"
