@@ -112,7 +112,6 @@ export class MoviesDownloaderTelegramBot {
 	}
 	
 	private cancelCalback(callbackId, chatId, message) {
-		this.bot.answerCallbackQuery(callbackId, `You canceled action`);
 		this.bot.editMessageText("Action is canceled.", { chat_id: chatId, message_id: message.message_id });
 	}
 
@@ -120,11 +119,9 @@ export class MoviesDownloaderTelegramBot {
 		try {
 			const addTorrentResult = await servicesReporitory.moviesDownloaderService.AddTorrent(torrentTrackerId);
 
-			this.bot.answerCallbackQuery(callbackId, `You selected ${torrentTrackerId}`);
 			this.bot.editMessageText(`Started Downloading of torrent '${addTorrentResult.name}'.`, { chat_id: chatId, message_id: message.message_id });
 			await servicesReporitory.torrentStatusManager.addActiveTorrent(addTorrentResult.hashString, chatId, message.message_id);
 		} catch (e) {
-			this.bot.answerCallbackQuery(callbackId, `Unable to download torrent ${torrentTrackerId}`);
 			this.bot.editMessageText(`Unable to download torrent ${torrentTrackerId}. Reason: ${e.message}`, { chat_id: chatId, message_id: message.message_id });
 		} 
 	}
@@ -134,7 +131,6 @@ export class MoviesDownloaderTelegramBot {
 			await servicesReporitory.transmissionClient.remove(torrentHash, true);
 			this.bot.editMessageText(`Torrent removed`, { chat_id: chatId, message_id: message.message_id });
 		} catch (e) {
-			this.bot.answerCallbackQuery(callbackId, `Unable to remove torrent with hash ${torrentHash}`);
 			this.bot.editMessageText(`Unable to remove torrent with hash ${torrentHash}. Reason: ${e.message}`, { chat_id: chatId, message_id: message.message_id });
 		}
 	}
