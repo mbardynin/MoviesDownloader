@@ -1,11 +1,11 @@
 import { servicesReporitory } from "./ServiceLocator"
 export class TorrentStatusManager {
-	private activeTorrents: { torrentHash: string; chatId: number }[] = [];
+	private activeTorrents: { torrentHash: string; chatId: number; messageId: number }[] = [];
 	private timeout;
 	private pollingIntervalMs = 1 * 60 * 1000;
 
-	addActiveTorrent(torrentHash: string, chatId: number) {
-		this.activeTorrents.push({ torrentHash: torrentHash, chatId: chatId });
+	addActiveTorrent(torrentHash: string, chatId: number, messageId: number) {
+		this.activeTorrents.push({ torrentHash: torrentHash, chatId: chatId, messageId: messageId });
 		this.startPollingIfNeed();
 	}
 
@@ -19,14 +19,17 @@ export class TorrentStatusManager {
 			}
 
 			const status = servicesReporitory.transmissionClient.statusArray[torrent.status];
+			const activeTorrent = self.activeTorrents[activeTorrentIndex];
 			if (status !== "SEED_WAIT" && status !== "SEED") {
+				// downloading is in progress. Report status.
+				const message = `Started downloading of torrent '${torrent.name}'. Status: ${status}, Progress: ${torrent.percentDone}%, Peers: ${torrent.peersConnected}`;
+				servicesReporitory.telegramBot.editMessage(activeTorrent.chatId, activeTorrent.messageId, message);
 				continue;
 			}
 
-			const activeTorrent = self.activeTorrents[activeTorrentIndex];
 			// send message
-			servicesReporitory.telegramBot.sendMessage(activeTorrent.chatId, `<b>Completed downloading</b> of torrent <i>'${torrent.name}'</i>.`);
-			servicesReporitory.telegramBot.sendMessageTorrentDownloaded(activeTorrent.chatId, `Do you want to <b>delete</b> '${torrent.name}'?`, torrent.hashString);
+			servicesReporitory.telegramBot.deleteMessage(activeTorrent.chatId, activeTorrent.messageId);
+			servicesReporitory.telegramBot.sendMessageTorrentDownloaded(activeTorrent.chatId, `Download completed. Do you want to <b>delete</b> '${torrent.name}'?`, torrent.hashString);
 			// remove from list
 			self.activeTorrents.splice(activeTorrentIndex, 1);
 		}

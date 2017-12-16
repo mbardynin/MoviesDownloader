@@ -16,8 +16,12 @@ export class MoviesDownloaderTelegramBot {
 		this.bot.processUpdate(messageBody);
 	}
 
-	sendMessage(chatId: number, message: string) {
-		this.bot.sendMessage(chatId, message, this.createSendMessageOptions());
+	editMessage(chatId: number, messageId: number, message: string) {
+		this.bot.editMessageText(message, { chat_id: chatId, message_id: messageId });
+	}
+
+	deleteMessage(chatId: number, messageId: number) {
+		this.bot.deleteMessage(chatId, messageId);
 	}
 
 	sendMessageTorrentDownloaded(chatId: number, message: string, torrentHash: string) {
@@ -118,7 +122,7 @@ export class MoviesDownloaderTelegramBot {
 
 			this.bot.answerCallbackQuery(callbackId, `You selected ${torrentTrackerId}`);
 			this.bot.editMessageText(`Started Downloading of torrent '${addTorrentResult.name}'.`, { chat_id: chatId, message_id: message.message_id });
-			await servicesReporitory.torrentStatusManager.addActiveTorrent(addTorrentResult.hashString, chatId);
+			await servicesReporitory.torrentStatusManager.addActiveTorrent(addTorrentResult.hashString, chatId, message.message_id);
 		} catch (e) {
 			this.bot.answerCallbackQuery(callbackId, `Unable to download torrent ${torrentTrackerId}`);
 			this.bot.editMessageText(`Unable to download torrent ${torrentTrackerId}. Reason: ${e.message}`, { chat_id: chatId, message_id: message.message_id });
@@ -161,7 +165,7 @@ export class MoviesDownloaderTelegramBot {
 		return this.createKeyboardButton("Cancel", CallbackData.create(BotCallbackActions.Cancel));
 	}
 
-	private createSendMessageOptions(keyboard = null) {
+	private createSendMessageOptions(keyboard) {
 		if (keyboard) {
 			keyboard.push(this.createCancelInlineButton());
 		}
