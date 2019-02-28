@@ -57,8 +57,8 @@ export class RutrackerWrapper {
 				
 				convertedResults = this.applyFilterIfNotEmptyResult(convertedResults, this.isHdVideo);
 				console.info(`left ${convertedResults.length} torrents after filtration by category HD Video`);
-
-				resolve(convertedResults.sort((a, b) => b.sizeGb - a.sizeGb));
+				
+				resolve(convertedResults.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 8));
 			});
 		});
 	}
