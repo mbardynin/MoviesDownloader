@@ -58,17 +58,17 @@ export class MoviesDownloaderTelegramBot {
 			});
 
 		this.bot.telegram.deleteWebhook()
+		this.bot.use(Telegraf.log())
 		
 
-		this.bot.command('echo', (msg, match) => {
-			const chatId = msg.chat.id;
-			const resp = match[1];
-			this.bot.telegram.sendMessage(chatId, resp);
+		this.bot.command('echo', (ctx) => {
+			const resp = ctx.match[1];
+			ctx.reply(resp)
 		});
 
-		this.bot.command('getChatId', (msg) => {
-			const chatId = msg.chat.id;
-			this.bot.telegram.sendMessage(chatId, chatId.toString());
+		this.bot.command('getChatId', (ctx) => {
+			const chatId = ctx.chat.id;
+			ctx.reply(chatId.toString())
 		});
 
 		this.bot.hears(/http[s]*:\/\/www.kinopoisk.ru\/film\/(\d+)/, 

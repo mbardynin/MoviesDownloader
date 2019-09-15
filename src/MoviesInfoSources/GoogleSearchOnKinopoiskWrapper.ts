@@ -24,6 +24,12 @@ export class GoogleSearchOnKinopoiskWrapper {
           reject(err);
         }
 
+        if(resp == null)
+        {
+          console.log('No results found in google search');
+          resolve(null);
+        }
+
         var item = resp.items.find(x => isFilmPage(x, kinopoiskId));
         if (item) {
           let result: IMovieInfo = {
