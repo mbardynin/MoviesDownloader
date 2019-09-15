@@ -31,6 +31,7 @@ export interface ITelegramBotSettings {
 	allowedChats: number[];
 	useWebHooks: boolean;
 	webHooksBaseUrl: string;
+	useProxy: boolean;
 }
 
 export interface ITransmissionSettings {

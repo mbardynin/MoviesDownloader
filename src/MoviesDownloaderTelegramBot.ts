@@ -3,6 +3,7 @@ import { ExtraEditMessage } from "telegraf/typings/telegram-types";
 import { servicesReporitory } from "./ServiceLocator"
 import { ITelegramBotSettings } from "./Config";
 import { ITorrentTrackerSearchResult, TorrentTrackerType } from "./Trackers/Interfaces";
+import SocksAgent from 'socks5-https-client/lib/Agent';
 
 export class MoviesDownloaderTelegramBot {
 	private readonly options: ITelegramBotSettings;
@@ -40,11 +41,23 @@ export class MoviesDownloaderTelegramBot {
 	activate() {
 		const self = this;
 
+		var socksAgent = null;
+		if(this.options.useProxy)
+		{
+			socksAgent = new SocksAgent({
+			socksHost: 'localhost',
+			socksPort: 1080,
+			});
+		}
+
 		this.bot = new Telegraf(this.options.token, {
 				telegram: { 
-					webhookReply: this.options.useWebHooks
+					webhookReply: this.options.useWebHooks,
+					agent: socksAgent
 				}
 			});
+
+		this.bot.telegram.deleteWebhook()
 		
 
 		this.bot.command('echo', (msg, match) => {

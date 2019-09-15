@@ -26,7 +26,8 @@
         "token": "token",
         "allowedChats": [1, 2, -3],
 	    "useWebHooks": true,
-	    "webHooksBaseUrl": "https://mysite.net"
+	    "webHooksBaseUrl": "https://mysite.net",
+        "useProxy": false
     },
     "port": 1337,
 

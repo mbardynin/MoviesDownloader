@@ -19,7 +19,10 @@ export class Server {
 		const self = this;
 		
 		// WebHook for bot
-        app.use(servicesReporitory.telegramBot.webhookCallback());
+		if(servicesReporitory.config.telegramBotSettings.useWebHooks)
+        {
+			app.use(servicesReporitory.telegramBot.webhookCallback());
+		}
 		
 		app.get("/", (req, res) => {
 			if (!self.checkPrincipal(req)) {
