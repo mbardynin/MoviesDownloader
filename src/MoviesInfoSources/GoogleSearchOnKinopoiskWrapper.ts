@@ -1,5 +1,5 @@
 var google = require('googleapis');
-var customsearch = google.customsearch_v1;
+var customsearch = google.customsearch("v1");
 
 import { IGoogleSearchOnKinopoiskSettings } from "./../Config"
 
