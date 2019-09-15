@@ -11,7 +11,11 @@ export class RutrackerWrapper {
 	}
 
 	login(options: ILoginPassword) {
-		this.rutracker.login(options.login, options.password);
+		this.rutracker.login(options.login, options.password)
+		.then(() => {
+		  console.log('Rutracker: Authorized');
+		})
+		.catch(err => console.error(err));
 	}
 
 	async download(rutrackerId: number): Promise<string> {
