@@ -61,9 +61,8 @@ export class MoviesDownloaderTelegramBot {
 		this.bot.use(Telegraf.log())
 		
 
-		this.bot.command('echo', (ctx) => {
-			const resp = ctx.match[1];
-			ctx.reply(resp)
+		this.bot.command('hi', (ctx) => {
+			ctx.reply("Hi!")
 		});
 
 		this.bot.command('getChatId', (ctx) => {

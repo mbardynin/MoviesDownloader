@@ -22,12 +22,14 @@ export class GoogleSearchOnKinopoiskWrapper {
       customsearch.cse.list({ cx: this.options.customSearchId, q: kinopoiskId, auth: this.options.apiKey }, function (err, resp) {
         if (err) {
           reject(err);
+          return;
         }
 
         if(resp == null)
         {
           console.log('No results found in google search');
           resolve(null);
+          return;
         }
 
         var item = resp.items.find(x => isFilmPage(x, kinopoiskId));
