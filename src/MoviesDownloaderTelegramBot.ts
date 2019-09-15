@@ -72,10 +72,10 @@ export class MoviesDownloaderTelegramBot {
 		});
 
 		this.bot.hears(/http[s]*:\/\/www.kinopoisk.ru\/film\/(\d+)/, 
-			async (msg, match) => await this.processMovie(msg, match, self));
+			async (ctx) => await this.processMovie(ctx, self));
 
 		this.bot.hears(/http[s]*:\/\/www.kinopoisk.ru\/film\/[\w\d-]*-(\d+)/, 
-			async (msg, match) => await this.processMovie(msg, match, self));
+			async (ctx) => await this.processMovie(ctx, self));
 
 		this.bot.action(/^(\d+)\|(\w*)$/, async ctx => {
 			const callbackData = CallbackData.parse(ctx.callbackQuery.data);
@@ -113,29 +113,29 @@ export class MoviesDownloaderTelegramBot {
 		return console.log(`bot is activated`)
 	}
 
-	private async processMovie(msg, match, self: this) {			
-		const chatId = msg.chat.id;
+	private async processMovie(ctx: ContextMessageUpdate, self: this) {			
+		const chatId = ctx.chat.id;
 		// check permissions
 		if (!this.isAllowedChat(chatId)) {
-			this.bot.telegram.sendMessage(chatId, "You have not permissions for downloading movies.");
+			ctx.reply("You have not permissions for downloading movies.");
 			return;
 		}
 
-		const filmId = match[1];	
+		const filmId = Number.parseInt(ctx.match[1]);	
 		try {
 			const rutrackerResults = await servicesReporitory.moviesDownloaderService.GetApplicableTorrents(filmId);
 			if (rutrackerResults.length === 0) {
-				this.bot.telegram.sendMessage(chatId, "Appropriate torrents on torrent trackers don't found.");
+				ctx.reply("Appropriate torrents on torrent trackers don't found.");
 				return;
 			}
 
 			const message = this.createDownloadMessage(rutrackerResults);
 			const keyboard = this.createDownloadMessageKeyboard(rutrackerResults);
 			const opts = this.createSendMessageOptions(keyboard);
-			this.bot.telegram.sendMessage(chatId, message, opts);
+			ctx.reply(message, opts);
 			
 		} catch (e) {
-			this.bot.telegram.sendMessage(chatId, `Unable to find appropriate torrents. Reason: ${e.message}`);
+			ctx.reply(`Unable to find appropriate torrents. Reason: ${e.message}`);
 		} 
 	}
 	
