@@ -19,11 +19,7 @@ export class Server {
 		const self = this;
 		
 		// WebHook for bot
-        app.use(bodyParser.json());
-        app.post(`/bot${servicesReporitory.config.telegramBotSettings.token}`, (req, res) => {
-          servicesReporitory.telegramBot.processUpdate(req.body);
-          res.sendStatus(200);
-		});
+        app.use(servicesReporitory.telegramBot.webhookCallback());
 		
 		app.get("/", (req, res) => {
 			if (!self.checkPrincipal(req)) {

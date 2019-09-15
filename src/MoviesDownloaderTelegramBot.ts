@@ -1,27 +1,32 @@
-﻿var TelegramBot = require("node-telegram-bot-api");
+﻿import Telegraf, {ContextMessageUpdate, Extra, Markup, Buttons, CallbackButton } from "telegraf"
+import { ExtraEditMessage } from "telegraf/typings/telegram-types";
 import { servicesReporitory } from "./ServiceLocator"
 import { ITelegramBotSettings } from "./Config";
 import { ITorrentTrackerSearchResult, TorrentTrackerType } from "./Trackers/Interfaces";
 
 export class MoviesDownloaderTelegramBot {
 	private readonly options: ITelegramBotSettings;
-	private bot;
+	private bot : Telegraf<ContextMessageUpdate>;
 
 	constructor(options: ITelegramBotSettings) {
 		this.options = options;
 	}
 
 	// WebHook
-	processUpdate(messageBody) {
-		this.bot.processUpdate(messageBody);
+	// processUpdate(messageBody) {
+	// 	this.bot.processUpdate(messageBody);
+	// }
+
+	webhookCallback(): any{
+		return this.bot.webhookCallback(`/bot${this.options.token}`);
 	}
 
 	editMessage(chatId: number, messageId: number, message: string) {
-		this.bot.editMessageText(message, { chat_id: chatId, message_id: messageId, parse_mode: "HTML" });
+		this.bot.telegram.editMessageText(chatId, messageId, null, message, { parse_mode: "HTML" });
 	}
 
 	deleteMessage(chatId: number, messageId: number) {
-		this.bot.deleteMessage(chatId, messageId);
+		this.bot.telegram.deleteMessage(chatId, messageId);
 	}
 
 	sendMessageTorrentDownloaded(chatId: number, message: string, torrentHash: string) {
@@ -29,59 +34,69 @@ export class MoviesDownloaderTelegramBot {
 			this.createKeyboardButton("Yes", CallbackData.create(BotCallbackActions.RemoveTorrent, torrentHash))
 		];
 		const opts = this.createSendMessageOptions(keyboard);
-		this.bot.sendMessage(chatId, message, opts);
+		this.bot.telegram.sendMessage(chatId, message, opts);
 	}
 
 	activate() {
 		const self = this;
 
-		if (this.options.useWebHooks) 
-		{
-			this.bot = new TelegramBot(this.options.token);
-			// callback routing configured in server.ts
-			this.bot.setWebHook(`${this.options.webHooksBaseUrl}/bot${this.options.token}`); 
-		}
-		else
-		{
-			this.bot = new TelegramBot(this.options.token, { polling: true });
-		}
+		this.bot = new Telegraf(this.options.token, {
+				telegram: { 
+					webhookReply: this.options.useWebHooks
+				}
+			});
+		
 
-		this.bot.onText(/\/echo (.+)/, (msg, match) => {
+		this.bot.command('echo', (msg, match) => {
 			const chatId = msg.chat.id;
 			const resp = match[1];
-			this.bot.sendMessage(chatId, resp);
+			this.bot.telegram.sendMessage(chatId, resp);
 		});
 
-		this.bot.onText(/\/getChatId/, (msg) => {
+		this.bot.command('getChatId', (msg) => {
 			const chatId = msg.chat.id;
-			this.bot.sendMessage(chatId, chatId);
+			this.bot.telegram.sendMessage(chatId, chatId.toString());
 		});
 
-		this.bot.onText(/http[s]*:\/\/www.kinopoisk.ru\/film\/(\d+)/, 
+		this.bot.hears(/http[s]*:\/\/www.kinopoisk.ru\/film\/(\d+)/, 
 			async (msg, match) => await this.processMovie(msg, match, self));
 
-		this.bot.onText(/http[s]*:\/\/www.kinopoisk.ru\/film\/[\w\d-]*-(\d+)/, 
+		this.bot.hears(/http[s]*:\/\/www.kinopoisk.ru\/film\/[\w\d-]*-(\d+)/, 
 			async (msg, match) => await this.processMovie(msg, match, self));
 
-		this.bot.on('callback_query', async callbackQuery => {
-			const callbackData = CallbackData.parse(callbackQuery.data);
-			const msg = callbackQuery.message;
+		this.bot.action(/^(\d+)\|(\w*)$/, async ctx => {
+			const callbackData = CallbackData.parse(ctx.callbackQuery.data);
+			const msg = ctx.callbackQuery.message;
 			const chatId = msg.chat.id;
 			switch (callbackData.action) {
 				case BotCallbackActions.Cancel:
-					this.cancelCalback(callbackQuery.id, chatId, msg);
+					this.cancelCalback(ctx.callbackQuery.id, chatId, msg);
 					return;
 				case BotCallbackActions.Download:
-					await this.downloadCalback(callbackQuery.id, chatId, msg, callbackData.data);
+					await this.downloadCalback(ctx.callbackQuery.id, chatId, msg, callbackData.data);
 					return;
 				case BotCallbackActions.RemoveTorrent:
-					await this.removeTorrentCalback(callbackQuery.id, chatId, msg, callbackData.data);
+					await this.removeTorrentCalback(ctx.callbackQuery.id, chatId, msg, callbackData.data);
 					return;
 				default:
 					console.warn(`Unknown callback action registered: '${callbackData.toString()}'`);
 			}
 		});
 		
+		this.bot.catch((err) => {
+			console.log('Ooops', err)
+		})
+		
+		if (this.options.useWebHooks) 
+		{
+			// callback routing configured in server.ts
+			this.bot.telegram.setWebhook(`${this.options.webHooksBaseUrl}/bot${this.options.token}`, null, 443)
+		}
+		else
+		{
+			this.bot.startPolling()
+		}
+
 		return console.log(`bot is activated`)
 	}
 
@@ -89,7 +104,7 @@ export class MoviesDownloaderTelegramBot {
 		const chatId = msg.chat.id;
 		// check permissions
 		if (!this.isAllowedChat(chatId)) {
-			this.bot.sendMessage(chatId, "You have not permissions for downloading movies.");
+			this.bot.telegram.sendMessage(chatId, "You have not permissions for downloading movies.");
 			return;
 		}
 
@@ -97,17 +112,17 @@ export class MoviesDownloaderTelegramBot {
 		try {
 			const rutrackerResults = await servicesReporitory.moviesDownloaderService.GetApplicableTorrents(filmId);
 			if (rutrackerResults.length === 0) {
-				this.bot.sendMessage(chatId, "Appropriate torrents on torrent trackers don't found.");
+				this.bot.telegram.sendMessage(chatId, "Appropriate torrents on torrent trackers don't found.");
 				return;
 			}
 
 			const message = this.createDownloadMessage(rutrackerResults);
 			const keyboard = this.createDownloadMessageKeyboard(rutrackerResults);
 			const opts = this.createSendMessageOptions(keyboard);
-			this.bot.sendMessage(chatId, message, opts);
+			this.bot.telegram.sendMessage(chatId, message, opts);
 			
 		} catch (e) {
-			this.bot.sendMessage(chatId, `Unable to find appropriate torrents. Reason: ${e.message}`);
+			this.bot.telegram.sendMessage(chatId, `Unable to find appropriate torrents. Reason: ${e.message}`);
 		} 
 	}
 	
@@ -144,45 +159,38 @@ export class MoviesDownloaderTelegramBot {
 		return message;
 	}
 
-	private createDownloadMessageKeyboard(rutrackerResults: ITorrentTrackerSearchResult[]) {
+	private createDownloadMessageKeyboard(rutrackerResults: ITorrentTrackerSearchResult[]) : Buttons[][] {
 		return rutrackerResults.map(x => this.createKeyboardButton(`${TorrentTrackerType[x.id.type]} [${x.sizeGb}GB]`, CallbackData.create(BotCallbackActions.Download, x.id.toString())));
 	}
 
-	private createKeyboardButton(text: string, callbackData: CallbackData) {
-		return [
-			{
+	private createKeyboardButton(text: string, callbackData: CallbackData) : CallbackButton[] {
+		return [{
 				text: text,
-				callback_data: callbackData.toString()
-			}
-		];
+				callback_data: callbackData.toString(),
+				hide: false
+			}];
 	}
 
-	private createCancelInlineButton() {
+	private createCancelInlineButton() : Buttons[] {
 		return this.createKeyboardButton("Cancel", CallbackData.create(BotCallbackActions.Cancel));
 	}
 
-	private createSendMessageOptions(keyboard) {
+	private createSendMessageOptions(keyboard: Buttons[][] | null = null): ExtraEditMessage {
+		var markup = new Markup()
 		if (keyboard) {
 			keyboard.push(this.createCancelInlineButton());
+			markup.inlineKeyboard(keyboard, null);
 		}
-
-		const opts = this.createOptions(keyboard);
+		
+		const opts = this.createOptions(markup);
 		return opts;
 	}
 
-	private createOptions(keyboard = null) {
-		var res = {
-			reply_markup: null,
-			disable_web_page_preview: true,
-			parse_mode: "HTML"
-		};
-
-		if (keyboard) {
-			res.reply_markup = {
-					inline_keyboard: keyboard
-				};
-		}
-		return res;
+	private createOptions(reply_markup : Markup | null = null) : ExtraEditMessage {
+		return new Extra(null)
+			.HTML(true)
+			.webPreview(false)
+			.markup(reply_markup);
 	}
 
 	private isAllowedChat(id: number): boolean {

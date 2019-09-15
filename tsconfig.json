@@ -4,10 +4,19 @@
     "module": "commonjs",
     "outDir": "bin",
     "rootDir": "src",
-    "sourceMap": true
+    "sourceMap": true,    
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+		"skipLibCheck": true
   },
   "files": [
     "node_modules/@types/node/index.d.ts"
+  ],
+  "typeRoots": [
+      "node_modules/@types",
+      "node_modules/telegraf/typings",
+      "node_modules/telegram-typings"
   ],
   "include": [
     "src/**/*.ts"

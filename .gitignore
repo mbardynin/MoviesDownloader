@@ -78,3 +78,4 @@ typings/
 package-lock.json
 .vs/slnx.sqlite-journal
 .vs/slnx.sqlite
+.vs/VSWorkspaceState.json

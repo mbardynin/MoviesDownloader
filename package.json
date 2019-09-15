@@ -20,16 +20,16 @@
     "filesize-parser": "^1.5.0",
     "googleapis": "^43.0.0",
     "iconv-lite": "^0.4.24",
-    "node-telegram-bot-api": "^0.29.0",
     "request": "^2.88.0",
     "rutracker-api": "^0.2.0",
+    "telegraf": "^3.32.0",
     "transmission-client": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^7.10.7",
     "gulp": "^4.0.2",
     "gulp-zip": "^4.2.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.6.3"
   },
   "engines": {
     "node": "7.7.4"
