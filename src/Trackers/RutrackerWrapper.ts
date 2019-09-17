@@ -11,7 +11,7 @@ export class RutrackerWrapper {
 	}
 
 	login(options: ILoginPassword) {
-		this.rutracker.login(options.login, options.password)
+		this.rutracker.login( { username: options.login, password: options.password})
 		.then(() => {
 		  console.log('Rutracker: Authorized');
 		})
@@ -20,33 +20,35 @@ export class RutrackerWrapper {
 
 	async download(rutrackerId: number): Promise<string> {
 		return new Promise<string>((resolve) => {
-			this.rutracker.download(rutrackerId, response => {
-				var chunks = [];
-				response.on("data", chunk => {
-					chunks.push(chunk);
-				});
+			this.rutracker.download(rutrackerId)
+				.then( response => {
+					var chunks = [];
+					response.on("data", chunk => {
+						chunks.push(chunk);
+					});
 
-				response.on("end", () => {
-					const torrentFileContentBase64 = Buffer.concat(chunks).toString("base64");
-					resolve(torrentFileContentBase64);
-				});
+					response.on("end", () => {
+						const torrentFileContentBase64 = Buffer.concat(chunks).toString("base64");
+						resolve(torrentFileContentBase64);
+					});
 			});
 		});
 	}
 
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {
 		return new Promise<ITorrentTrackerSearchResult[]>((resolve) => {
-			this.rutracker.search(query, torents => {
-				let convertedResults: ITorrentTrackerSearchResult[] = torents.map( (x) => {
-					return {
-						id: TorrentTrackerId.create(TorrentTrackerType.Kinopoisk, x.id),
-						state: x.state,
-						category: x.category,
-						title: x.title,
-						sizeGb: Math.round((filesizeParser(x.size) / (1024 * 1024 * 1024)) * 10) /10,
-						seeds: x.seeds,
-						url: x.url						
-					};
+			this.rutracker.search({ query: query, sort: 'size' })
+				.then(torents => {
+					let convertedResults: ITorrentTrackerSearchResult[] = torents.map( (x) => {
+						return {
+							id: TorrentTrackerId.create(TorrentTrackerType.Kinopoisk, x.id),
+							state: x.state,
+							category: x.category,
+							title: x.title,
+							sizeGb: Math.round((filesizeParser(x.size) / (1024 * 1024 * 1024)) * 10) /10,
+							seeds: x.seeds,
+							url: x.url						
+						};
 				});
 
 				console.info(`find ${convertedResults.length} torrents`);
