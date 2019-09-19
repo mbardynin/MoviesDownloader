@@ -1,5 +1,7 @@
-﻿export enum TorrentTrackerType {
-	Kinopoisk = 1
+﻿
+export enum TorrentTrackerType {
+	Rutracker = 1,
+	ThePirateBay = 2
 }
 
 //export interface IRutrackerSearchResult {
@@ -34,12 +36,18 @@ export interface ITorrentTrackerSearchResult {
 	id: TorrentTrackerId;
 	state: string,
 	category: string,
+	isHD: boolean
 	title: string,
 	// in GB
 	sizeGb: number,
 	seeds: number,
 	url: string;
 
+}
+
+export interface ITorrent {
+	torrentFileContentBase64?: string | null,
+	magnetLink?: string
 }
 
 export class TorrentTrackerId {
@@ -69,3 +77,12 @@ export class TorrentTrackerId {
 		return `${TorrentTrackerType[this.type]}_${this.id}`;
 	}
 }
+
+export interface ITorrentTrackerAdapter
+{
+	Key: TorrentTrackerType;
+
+	download(id: number): Promise<ITorrent>;
+
+	search(query: string): Promise<ITorrentTrackerSearchResult[]>;
+} 

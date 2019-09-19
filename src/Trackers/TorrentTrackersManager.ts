@@ -1,23 +1,66 @@
-﻿import {RutrackerWrapper} from "./RutrackerWrapper"
-import {ITorrentTrackerSearchResult, TorrentTrackerId, TorrentTrackerType } from "./Interfaces";
+﻿import {RutrackerAdapter} from "./RutrackerAdapter"
+import {ITorrentTrackerSearchResult, TorrentTrackerId, TorrentTrackerType, ITorrentTrackerAdapter, ITorrent } from "./Interfaces";
 import {ITorrentTrackersManagerSettings} from "../Config";
+import { ThePirateBayAdapter } from "./ThePirateBayAdapter";
 
 export class TorrentTrackerManager {
-	private readonly rutracker = new RutrackerWrapper();
+	private readonly trackers: Map<TorrentTrackerType, ITorrentTrackerAdapter>
 	
 	constructor(settings: ITorrentTrackersManagerSettings) {
-		this.rutracker.login(settings.rutrackerSettings);
+		this.trackers = new Map<TorrentTrackerType, ITorrentTrackerAdapter>();
+		this.trackers.set(TorrentTrackerType.Rutracker, new RutrackerAdapter(settings.rutrackerSettings));
+		this.trackers.set(TorrentTrackerType.ThePirateBay, new ThePirateBayAdapter());
 	}
 
-	async download(torrentTrackerId: TorrentTrackerId): Promise<string> {
-		if (torrentTrackerId.type === TorrentTrackerType.Kinopoisk) {
-			return await this.rutracker.download(torrentTrackerId.id);
+	async download(torrentTrackerId: TorrentTrackerId): Promise<ITorrent> {
+		if (!this.trackers.has(torrentTrackerId.type)) {
+			return Promise.reject(`Unsupported torrent tracker type ${torrentTrackerId.type}`);
 		}
-
-		return Promise.reject(`Unsupported torrent tracker type ${torrentTrackerId.type}`);
+		
+		var tracker = this.trackers.get(torrentTrackerId.type);
+		return await tracker.download(torrentTrackerId.id);
 	}
 
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {
-		return await this.rutracker.search(query);
+		var res: ITorrentTrackerSearchResult[] = [];
+		for(let tracker of this.trackers.values())
+		{
+			var results = await this.searchInTracker(tracker, query);
+			console.log(`found ${results.length} torrents on tracker ${tracker.Key}`)
+			res = [...res, ...results];
+		}
+
+		return this.applyFilters(res);
+	}	
+
+	private async searchInTracker(tracker: ITorrentTrackerAdapter, query: string): Promise<ITorrentTrackerSearchResult[]>
+	{
+		try
+		{
+			return await tracker.search(query);
+		}
+		catch(e)
+		{
+			console.log(`Error occured on search request with query ${query} on tracker ${tracker.Key}. Details: ${e}`)
+			return [];
+		}
+	}
+
+	private applyFilters(results: ITorrentTrackerSearchResult[]): ITorrentTrackerSearchResult[]
+	{
+		var res = this.applyFilterIfNotEmptyResult(results, x => x.sizeGb <= 25 && x.sizeGb >= 7);
+		console.info(`left ${res.length} torrents after filtration by size`);
+		
+		res = this.applyFilterIfNotEmptyResult(res, x => x.isHD);
+		console.info(`left ${res.length} torrents after filtration by category HD Video`);
+		
+		return res.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 8);
+		
+	}
+
+	private applyFilterIfNotEmptyResult<T>(arr: T[],
+		predicate: (value: T) => boolean): T[] {
+		const filteredResults = arr.filter(predicate);
+		return filteredResults.length === 0 ? arr : filteredResults;
 	}
 }

@@ -13,8 +13,19 @@ export class MoviesDownloaderService {
 
 	async AddTorrent(torrentTrackerIdStr: string): Promise<ITransmissionAddTorrentResult> {
 		const torrentTrackerId = TorrentTrackerId.parseFromString(torrentTrackerIdStr);
-		const torrentFileContentBase64 = await servicesReporitory.torrentTrackerManager.download(torrentTrackerId);
-		return await servicesReporitory.transmissionClient.addBase64(torrentFileContentBase64);
+		const torrent = await servicesReporitory.torrentTrackerManager.download(torrentTrackerId);
+		if(torrent.torrentFileContentBase64)
+		{
+			return await servicesReporitory.transmissionClient.addBase64(torrent.torrentFileContentBase64);
+		}		
+		else if(torrent.magnetLink)
+		{
+			return await servicesReporitory.transmissionClient.addMagnet(torrent.magnetLink, null);
+		}
+		else
+		{
+			throw `unable to download torrent ${torrentTrackerId}`;			
+		}
 	}
 }
 
