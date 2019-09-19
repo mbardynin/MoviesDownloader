@@ -1,5 +1,4 @@
 ﻿var rutrackerApi = require("rutracker-api");
-var filesizeParser = require("filesize-parser");
 import {ILoginPassword} from "../Config";
 import {ITorrentTrackerSearchResult, TorrentTrackerType, TorrentTrackerId } from "./Interfaces";
 
@@ -36,37 +35,34 @@ export class RutrackerWrapper {
 	}
 
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {
-		return new Promise<ITorrentTrackerSearchResult[]>((resolve) => {
-			this.rutracker.search({ query: query, sort: 'size' })
-				.then(torents => {
-					let convertedResults: ITorrentTrackerSearchResult[] = torents.map( (x) => {
-						return {
-							id: TorrentTrackerId.create(TorrentTrackerType.Kinopoisk, x.id),
-							state: x.state,
-							category: x.category,
-							title: x.title,
-							sizeGb: Math.round((filesizeParser(x.size) / (1024 * 1024 * 1024)) * 10) /10,
-							seeds: x.seeds,
-							url: x.url						
-						};
-				});
+		
+		var torrents = await this.rutracker.search({ query: query, sort: 'size' });		
+		let convertedResults: ITorrentTrackerSearchResult[] = torrents.map( (x) => {
+			return {
+				id: TorrentTrackerId.create(TorrentTrackerType.Kinopoisk, x.id),
+				state: x.state,
+				category: x.category,
+				title: x.title,
+				sizeGb: Math.round((x.size / (1024 * 1024 * 1024)) * 10) /10,
+				seeds: x.seeds,
+				url: x.url						
+			};});
+	
 
-				console.info(`find ${convertedResults.length} torrents`);
-				convertedResults = convertedResults
-					.filter(this.notDvd)
-					.filter(this.not3d)
-					.filter(this.notForAppleTv)
-					.filter(this.atLeast1Seed);
+		console.info(`find ${convertedResults.length} torrents`);
+		convertedResults = convertedResults
+			.filter(this.notDvd)
+			.filter(this.not3d)
+			.filter(this.notForAppleTv)
+			.filter(this.atLeast1Seed);
 
-				convertedResults = this.applyFilterIfNotEmptyResult(convertedResults, this.haveAppropriateSize);
-				console.info(`left ${convertedResults.length} torrents after filtration by size`);
-				
-				convertedResults = this.applyFilterIfNotEmptyResult(convertedResults, this.isHdVideo);
-				console.info(`left ${convertedResults.length} torrents after filtration by category HD Video`);
-				
-				resolve(convertedResults.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 8));
-			});
-		});
+		convertedResults = this.applyFilterIfNotEmptyResult(convertedResults, this.haveAppropriateSize);
+		console.info(`left ${convertedResults.length} torrents after filtration by size`);
+		
+		convertedResults = this.applyFilterIfNotEmptyResult(convertedResults, this.isHdVideo);
+		console.info(`left ${convertedResults.length} torrents after filtration by category HD Video`);
+		
+		return convertedResults.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 8);
 	}
 
 	private applyFilterIfNotEmptyResult<T>(arr: T[],
