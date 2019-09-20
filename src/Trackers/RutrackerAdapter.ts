@@ -31,16 +31,13 @@ export class RutrackerAdapter implements ITorrentTrackerAdapter {
 				sizeGb: Math.round((x.size / (1024 * 1024 * 1024)) * 10) /10,
 				seeds: x.seeds,
 				url: x.url	,
-				IsHD: x.category.includes("(HD Video)")					
+				isHD: x.category.includes("(HD Video)")					
 			};});
 	
-
-		console.info(`found ${convertedResults.length} torrents`);
 		convertedResults = convertedResults
 			.filter(this.notDvd)
 			.filter(this.not3d)
-			.filter(this.notForAppleTv)
-			.filter(this.atLeast1Seed);
+			.filter(this.notForAppleTv);
 		
 		return convertedResults
 	}
@@ -71,9 +68,5 @@ export class RutrackerAdapter implements ITorrentTrackerAdapter {
 
 	private notForAppleTv(element: ITorrentTrackerSearchResult) {
 		return element.category !== "Фильмы HD для Apple TV";
-	}
-
-	private atLeast1Seed(element: ITorrentTrackerSearchResult) {
-		return element.seeds >= 1;
 	}
 }

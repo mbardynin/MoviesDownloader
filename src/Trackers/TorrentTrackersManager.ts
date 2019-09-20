@@ -48,6 +48,9 @@ export class TorrentTrackerManager {
 
 	private applyFilters(results: ITorrentTrackerSearchResult[]): ITorrentTrackerSearchResult[]
 	{
+		var res = results.filter(x => x.seeds >= 1);
+		console.log(`left ${res.length} torrents after filtration by seeds`);
+
 		var res = this.applyFilterIfNotEmptyResult(results, x => x.sizeGb <= 25 && x.sizeGb >= 7);
 		console.log(`left ${res.length} torrents after filtration by size`);
 		
