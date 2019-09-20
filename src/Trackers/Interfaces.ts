@@ -4,35 +4,7 @@ export enum TorrentTrackerType {
 	ThePirateBay = 2
 }
 
-//export interface IRutrackerSearchResult {
-//	//state: 'проверено',
-//	//id: 'XXXXXXXX'
-//	//category: 'CATEGORY_NAME',
-//	//title: 'TITLE',
-//	//author: 'AUTHOR_NAME',
-//	//size: '1.07 GB',
-//	//seeds: '7123',
-//	//leechs: '275',
-//	//url: 'rutracker.org/forum/viewtopic.php?t=XXXXXX'
-//	state: string,
-//	id: number;
-//	category: string,
-//	title: string,
-//	// in GB
-//	sizeGb: number,
-//	seeds: number,
-//	url: string;
-//}
 export interface ITorrentTrackerSearchResult {
-	//state: 'проверено',
-	//id: 'XXXXXXXX'
-	//category: 'CATEGORY_NAME',
-	//title: 'TITLE',
-	//author: 'AUTHOR_NAME',
-	//size: '1.07 GB',
-	//seeds: '7123',
-	//leechs: '275',
-	//url: 'rutracker.org/forum/viewtopic.php?t=XXXXXX'
 	id: TorrentTrackerId;
 	state: string,
 	category: string,
@@ -42,7 +14,6 @@ export interface ITorrentTrackerSearchResult {
 	sizeGb: number,
 	seeds: number,
 	url: string;
-
 }
 
 export interface ITorrent {

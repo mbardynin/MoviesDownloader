@@ -28,7 +28,8 @@ export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 				title: x.name,
 				sizeGb: Math.round((filesizeParser(x.size) / (1024 * 1024 * 1024)) * 10) /10,
 				seeds: x.seeders,
-				url: x.link						
+				url: x.link,
+				isHD: true				
 			};});
 	}
 }
