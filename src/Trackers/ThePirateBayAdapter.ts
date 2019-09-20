@@ -16,20 +16,23 @@ export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 	//     207 - HD - Movies
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {	
 		var searchOptions = {
-			category: '/search/0/99/207',    // HD - Movies
+			category: 'video',
 			orderBy: 'size'
 		  };	
-		var torrents = await PirateBay.search(query, searchOptions);		
-		return torrents.map( (x) => {
-			return {
-				id: TorrentTrackerId.create(TorrentTrackerType.ThePirateBay, x.id),
-				state: x.verified ? "verified" : "not verified",
-				category: x.subcategory.name,
-				title: x.name,
-				sizeGb: Math.round((filesizeParser(x.size) / (1024 * 1024 * 1024)) * 10) /10,
-				seeds: x.seeders,
-				url: x.link,
-				isHD: true				
-			};});
+		var torrents: Array<any> = await PirateBay.search(query, searchOptions);		
+		return torrents
+			.filter(x => x.subcategory.id == 201 || x.subcategory.id == 207) // moview and HD - movies
+			.map( (x) => {
+				return {
+					id: TorrentTrackerId.create(TorrentTrackerType.ThePirateBay, x.id),
+					state: x.verified ? "verified" : "not verified",
+					category: x.subcategory.name,
+					title: x.name,
+					sizeGb: Math.round((filesizeParser(x.size) / (1024 * 1024 * 1024)) * 10) /10,
+					seeds: x.seeders,
+					url: x.link,
+					isHD: x.subcategory.id == 207				
+				};
+			});
 	}
 }

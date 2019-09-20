@@ -14,7 +14,7 @@ export class TorrentTrackerManager {
 
 	async download(torrentTrackerId: TorrentTrackerId): Promise<ITorrent> {
 		if (!this.trackers.has(torrentTrackerId.type)) {
-			return Promise.reject(`Unsupported torrent tracker type ${torrentTrackerId.type}`);
+			throw `Unsupported torrent tracker type ${torrentTrackerId.type}`;
 		}
 		
 		var tracker = this.trackers.get(torrentTrackerId.type);
@@ -49,10 +49,10 @@ export class TorrentTrackerManager {
 	private applyFilters(results: ITorrentTrackerSearchResult[]): ITorrentTrackerSearchResult[]
 	{
 		var res = this.applyFilterIfNotEmptyResult(results, x => x.sizeGb <= 25 && x.sizeGb >= 7);
-		console.info(`left ${res.length} torrents after filtration by size`);
+		console.log(`left ${res.length} torrents after filtration by size`);
 		
 		res = this.applyFilterIfNotEmptyResult(res, x => x.isHD);
-		console.info(`left ${res.length} torrents after filtration by category HD Video`);
+		console.log(`left ${res.length} torrents after filtration by category HD Video`);
 		
 		return res.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 8);
 		
