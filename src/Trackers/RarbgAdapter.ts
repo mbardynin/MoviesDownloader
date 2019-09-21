@@ -1,12 +1,11 @@
 ﻿var rarbgApi = require('rarbg-api')
-import {ITorrentTrackerSearchResult, TorrentTrackerType, TorrentTrackerId, ITorrent, ITorrentTrackerAdapter } from "./Interfaces";
+import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentDownloadInfo, ITorrentTrackerAdapter } from "./Interfaces";
 
 export class RarbgAdapter implements ITorrentTrackerAdapter {
 	readonly Key: TorrentTrackerType = TorrentTrackerType.Rarbg;
-	async download(id: number): Promise<ITorrent> {
-		var torrent = await rarbgApi.getTorrent(id);
+	async download(id: ITorrentInfo): Promise<ITorrentDownloadInfo> {
 		return {
-			magnetLink: torrent.magnetLink
+			magnetLink: id.magnetLink
 		}
 	}
 
@@ -24,7 +23,7 @@ export class RarbgAdapter implements ITorrentTrackerAdapter {
 		return torrents
 			.map( (x) => {
 				return {
-					id: TorrentTrackerId.create(TorrentTrackerType.Rarbg, x.id), // todo: figure out how to get id
+					id: {type:TorrentTrackerType.Rarbg, magnetLink: x.download}, // todo: figure out how to get id
 					state: null,
 					category: x.category,
 					title: x.title,

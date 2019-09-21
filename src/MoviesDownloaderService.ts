@@ -1,5 +1,5 @@
 ﻿import { servicesReporitory } from "./ServiceLocator"
-import {ITorrentTrackerSearchResult, TorrentTrackerId } from "./Trackers/Interfaces";
+import {ITorrentTrackerSearchResult, ITorrentInfo } from "./Trackers/Interfaces";
 
 export class MoviesDownloaderService {
 
@@ -12,7 +12,7 @@ export class MoviesDownloaderService {
 	}
 
 	async AddTorrent(torrentTrackerIdStr: string): Promise<ITransmissionAddTorrentResult> {
-		const torrentTrackerId = TorrentTrackerId.parseFromString(torrentTrackerIdStr);
+		const torrentTrackerId : ITorrentInfo = JSON.parse(torrentTrackerIdStr);
 		const torrent = await servicesReporitory.torrentTrackerManager.download(torrentTrackerId);
 		if(torrent.torrentFileContentBase64)
 		{

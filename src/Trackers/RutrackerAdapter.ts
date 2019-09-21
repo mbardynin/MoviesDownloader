@@ -1,6 +1,6 @@
 ﻿var rutrackerApi = require("rutracker-api");
 import {ILoginPassword} from "../Config";
-import {ITorrentTrackerSearchResult, TorrentTrackerType, TorrentTrackerId, ITorrent, ITorrentTrackerAdapter } from "./Interfaces";
+import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentDownloadInfo, ITorrentTrackerAdapter } from "./Interfaces";
 
 export class RutrackerAdapter implements ITorrentTrackerAdapter {	
 	readonly Key: TorrentTrackerType = TorrentTrackerType.Rutracker;
@@ -15,8 +15,8 @@ export class RutrackerAdapter implements ITorrentTrackerAdapter {
 		.catch(err => console.error(err));
 	}
 
-	async download(rutrackerId: number): Promise<ITorrent> {
-		var fileContent = await this.downloadFile(rutrackerId);
+	async download(rutrackerId: ITorrentInfo): Promise<ITorrentDownloadInfo> {
+		var fileContent = await this.downloadFile(rutrackerId.id);
 		return { torrentFileContentBase64: fileContent }
 	}
 
@@ -24,7 +24,7 @@ export class RutrackerAdapter implements ITorrentTrackerAdapter {
 		var torrents = await this.rutracker.search({ query: query, sort: 'size' });		
 		let convertedResults: ITorrentTrackerSearchResult[] = torrents.map( (x) => {
 			return {
-				id: TorrentTrackerId.create(TorrentTrackerType.Rutracker, x.id),
+				id: {type:TorrentTrackerType.Rutracker, id: x.id},
 				state: x.state,
 				category: x.category,
 				title: x.title,

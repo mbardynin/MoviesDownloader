@@ -1,5 +1,5 @@
 ﻿import {RutrackerAdapter} from "./RutrackerAdapter"
-import {ITorrentTrackerSearchResult, TorrentTrackerId, TorrentTrackerType, ITorrentTrackerAdapter, ITorrent } from "./Interfaces";
+import {ITorrentTrackerSearchResult,  ITorrentInfo, TorrentTrackerType, ITorrentTrackerAdapter, ITorrentDownloadInfo } from "./Interfaces";
 import {ITorrentTrackersManagerSettings} from "../Config";
 import { ThePirateBayAdapter } from "./ThePirateBayAdapter";
 import { RarbgAdapter } from "./RarbgAdapter";
@@ -14,13 +14,13 @@ export class TorrentTrackerManager {
 		this.trackers.set(TorrentTrackerType.Rarbg, new RarbgAdapter());
 	}
 
-	async download(torrentTrackerId: TorrentTrackerId): Promise<ITorrent> {
+	async download(torrentTrackerId: ITorrentInfo): Promise<ITorrentDownloadInfo> {
 		if (!this.trackers.has(torrentTrackerId.type)) {
 			throw `Unsupported torrent tracker type ${torrentTrackerId.type}`;
 		}
 		
 		var tracker = this.trackers.get(torrentTrackerId.type);
-		return await tracker.download(torrentTrackerId.id);
+		return await tracker.download(torrentTrackerId);
 	}
 
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {

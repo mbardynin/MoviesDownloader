@@ -1,13 +1,12 @@
 ﻿var PirateBay = require("thepiratebay");
 var filesizeParser = require("filesize-parser");
-import {ITorrentTrackerSearchResult, TorrentTrackerType, TorrentTrackerId, ITorrent, ITorrentTrackerAdapter } from "./Interfaces";
+import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentDownloadInfo, ITorrentTrackerAdapter } from "./Interfaces";
 
 export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 	readonly Key: TorrentTrackerType = TorrentTrackerType.ThePirateBay;
-	async download(id: number): Promise<ITorrent> {
-		var torrent = await PirateBay.getTorrent(id);
+	async download(id: ITorrentInfo): Promise<ITorrentDownloadInfo> {
 		return {
-			magnetLink: torrent.magnetLink
+			magnetLink: id.magnetLink
 		}
 	}
 
@@ -27,7 +26,7 @@ export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 			.filter(x => x.subcategory.id == 201 || x.subcategory.id == 207) // moview and HD - movies
 			.map( (x) => {
 				return {
-					id: TorrentTrackerId.create(TorrentTrackerType.ThePirateBay, x.id),
+					id: {type:TorrentTrackerType.ThePirateBay, id: x.id, magnetLink: x.magnetLink},
 					state: x.verified ? "verified" : "not verified",
 					category: x.subcategory.name,
 					title: x.name,
