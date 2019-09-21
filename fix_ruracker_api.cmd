@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy Bypass -Command "(gc node_modules/rutracker-api/lib/parser.js) -replace 'size.find\(\"\*\"\)\.html\(\)', 'size.attr(\"data-ts_text\")' | Set-Content node_modules/rutracker-api/lib/parser.js"
