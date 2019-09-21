@@ -17,7 +17,10 @@ export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {	
 		var searchOptions = {
 			category: 'video',
-			orderBy: 'size'
+			orderBy: 'size',
+			filter: {
+			  verified: true
+			}
 		  };	
 		var torrents: Array<any> = await PirateBay.search(query, searchOptions);		
 		return torrents

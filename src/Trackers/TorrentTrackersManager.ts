@@ -2,6 +2,7 @@
 import {ITorrentTrackerSearchResult, TorrentTrackerId, TorrentTrackerType, ITorrentTrackerAdapter, ITorrent } from "./Interfaces";
 import {ITorrentTrackersManagerSettings} from "../Config";
 import { ThePirateBayAdapter } from "./ThePirateBayAdapter";
+import { RarbgAdapter } from "./RarbgAdapter";
 
 export class TorrentTrackerManager {
 	private readonly trackers: Map<TorrentTrackerType, ITorrentTrackerAdapter>
@@ -10,6 +11,7 @@ export class TorrentTrackerManager {
 		this.trackers = new Map<TorrentTrackerType, ITorrentTrackerAdapter>();
 		this.trackers.set(TorrentTrackerType.Rutracker, new RutrackerAdapter(settings.rutrackerSettings));
 		this.trackers.set(TorrentTrackerType.ThePirateBay, new ThePirateBayAdapter());
+		this.trackers.set(TorrentTrackerType.Rarbg, new RarbgAdapter());
 	}
 
 	async download(torrentTrackerId: TorrentTrackerId): Promise<ITorrent> {

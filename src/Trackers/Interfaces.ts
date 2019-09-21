@@ -1,7 +1,8 @@
 ﻿
 export enum TorrentTrackerType {
 	Rutracker = 1,
-	ThePirateBay = 2
+	ThePirateBay = 2,
+	Rarbg = 3
 }
 
 export interface ITorrentTrackerSearchResult {
