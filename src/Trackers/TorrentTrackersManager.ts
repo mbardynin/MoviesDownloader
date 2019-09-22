@@ -43,7 +43,7 @@ export class TorrentTrackerManager {
 		}
 		catch(e)
 		{
-			console.log(`Error occured on search request with query ${query} on tracker ${tracker.Key}. Details: ${e}`)
+			console.error(`Error occured on search request with query ${query} on tracker ${tracker.Key}. Details: ${e}`)
 			return [];
 		}
 	}
