@@ -3,6 +3,9 @@ import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentD
 
 export class RarbgAdapter implements ITorrentTrackerAdapter {
 	readonly Key: TorrentTrackerType = TorrentTrackerType.Rarbg;
+
+	isRus() : boolean{ return false; }
+
 	async download(id: ITorrentInfo): Promise<ITorrentDownloadInfo> {
 		return {
 			magnetLink: id.magnetLink

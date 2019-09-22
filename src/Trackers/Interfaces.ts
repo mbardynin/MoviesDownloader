@@ -30,7 +30,9 @@ export interface ITorrentInfo {
 
 export interface ITorrentTrackerAdapter
 {
-	Key: TorrentTrackerType;
+	readonly Key: TorrentTrackerType;
+
+	isRus() : boolean;
 
 	download(id: ITorrentInfo): Promise<ITorrentDownloadInfo>;
 

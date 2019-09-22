@@ -4,7 +4,7 @@ import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentD
 
 export class RutrackerAdapter implements ITorrentTrackerAdapter {	
 	readonly Key: TorrentTrackerType = TorrentTrackerType.Rutracker;
-	rutracker: any;
+	readonly rutracker: any;
 	constructor(options: ILoginPassword)
 	{
 		this.rutracker = new rutrackerApi();
@@ -14,6 +14,8 @@ export class RutrackerAdapter implements ITorrentTrackerAdapter {
 		})
 		.catch(err => console.error(err));
 	}
+
+	isRus() : boolean{ return true; }
 
 	async download(rutrackerId: ITorrentInfo): Promise<ITorrentDownloadInfo> {
 		var fileContent = await this.downloadFile(rutrackerId.id);

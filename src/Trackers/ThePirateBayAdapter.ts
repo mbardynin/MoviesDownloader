@@ -4,6 +4,9 @@ import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentD
 
 export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 	readonly Key: TorrentTrackerType = TorrentTrackerType.ThePirateBay;
+
+	isRus() : boolean{ return false; }
+
 	async download(id: ITorrentInfo): Promise<ITorrentDownloadInfo> {
 		return {
 			magnetLink: id.magnetLink

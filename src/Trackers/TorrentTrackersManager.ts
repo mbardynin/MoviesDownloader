@@ -25,10 +25,17 @@ export class TorrentTrackerManager {
 
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {
 		var res: ITorrentTrackerSearchResult[] = [];
+		var containsCyrillicLetters = /[а-яА-ЯЁё]/.test(query);
 		for(let tracker of this.trackers.values())
 		{
+			if(containsCyrillicLetters && !tracker.isRus())
+			{
+				console.info(`search string ${query} contains cyrillic letters. Skip tracker ${tracker.Key}.`)
+				continue;
+			}
+
 			var results = await this.searchInTracker(tracker, query);
-			console.log(`found ${results.length} torrents on tracker ${tracker.Key}`)
+			console.info(`found ${results.length} torrents on tracker ${tracker.Key}`)
 			res = [...res, ...results];
 		}
 
