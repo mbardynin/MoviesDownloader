@@ -65,14 +65,33 @@ export class TorrentTrackerManager {
 		
 		res = this.applyFilterIfNotEmptyResult(res, x => x.isHD);
 		console.log(`left ${res.length} torrents after filtration by category HD Video`);
-		
-		return res.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 8);
-		
+
+		var groupedByTracker = ArrayHelper.groupBy(res, x => x.id.type);
+		var result: ITorrentTrackerSearchResult[] = [];
+		groupedByTracker.forEach(val => result = [...result, ...val.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 3)]);
+		return result;		
 	}
 
 	private applyFilterIfNotEmptyResult<T>(arr: T[],
 		predicate: (value: T) => boolean): T[] {
 		const filteredResults = arr.filter(predicate);
 		return filteredResults.length === 0 ? arr : filteredResults;
+	}
+}
+
+class ArrayHelper
+{	
+	static groupBy<T, TKey>(list: Array<T>, keySelector: (value: T) => TKey): Map<TKey, T[]> {
+		const map = new Map<TKey, T[]>();
+		list.forEach((item) => {
+			const key = keySelector(item);
+			const collection = map.get(key);
+			if (!collection) {
+				map.set(key, [item]);
+			} else {
+				collection.push(item);
+			}
+		});
+		return map;
 	}
 }
