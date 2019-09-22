@@ -1,7 +1,7 @@
 {
   "name": "movies-downloader",
   "version": "1.0.0",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "description": "web service and telegram bot for downloading movies from torrent tracker",
   "main": "bin/app.js",
   "repository": {
