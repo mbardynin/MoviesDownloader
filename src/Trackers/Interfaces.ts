@@ -1,11 +1,12 @@
 ﻿
 export enum TorrentTrackerType {
 	Rutracker = 1,
-	ThePirateBay = 2
+	ThePirateBay = 2,
+	Rarbg = 3
 }
 
 export interface ITorrentTrackerSearchResult {
-	id: TorrentTrackerId;
+	id: ITorrentInfo;
 	state: string,
 	category: string,
 	isHD: boolean
@@ -16,44 +17,24 @@ export interface ITorrentTrackerSearchResult {
 	url: string;
 }
 
-export interface ITorrent {
+export interface ITorrentDownloadInfo {
 	torrentFileContentBase64?: string | null,
 	magnetLink?: string
 }
 
-export class TorrentTrackerId {
+export interface ITorrentInfo {
 	readonly type: TorrentTrackerType;
-	readonly id: number;
-
-	private constructor(type: TorrentTrackerType, id: number) {
-		this.type = type;
-		this.id = id;
-	}
-
-	static create(type: TorrentTrackerType, id: number): TorrentTrackerId {
-		return new TorrentTrackerId(type, id);
-	}
-
-	// format: kinopoisk_123546
-	static parseFromString(str: string): TorrentTrackerId {
-		const match = str.match(/([\w]+)_([\d]+)/);
-		if (!match) {
-			throw new Error(`String '${str}' can not be parsed to TorrentTrackerId`);
-		}
-
-		return new TorrentTrackerId(TorrentTrackerType[match[1]], Number(match[2]));
-	}
-
-	toString() : string {
-		return `${TorrentTrackerType[this.type]}_${this.id}`;
-	}
+	readonly id?: number;
+	readonly magnetLink?: string
 }
 
 export interface ITorrentTrackerAdapter
 {
-	Key: TorrentTrackerType;
+	readonly Key: TorrentTrackerType;
 
-	download(id: number): Promise<ITorrent>;
+	isRus() : boolean;
+
+	download(id: ITorrentInfo): Promise<ITorrentDownloadInfo>;
 
 	search(query: string): Promise<ITorrentTrackerSearchResult[]>;
 } 

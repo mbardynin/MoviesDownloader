@@ -1,4 +1,5 @@
 ﻿import { servicesReporitory } from "./ServiceLocator"
+import { TorrentTrackerType } from "./Trackers/Interfaces";
 let express = require("express");
 let app = express();
 let bodyParser = require('body-parser');
@@ -56,7 +57,7 @@ export class Server {
 				return;
 			}
 			try {
-				const rutrackerResults = await servicesReporitory.moviesDownloaderService.AddTorrent(req.params.rutrackerId);
+				const rutrackerResults = await servicesReporitory.moviesDownloaderService.AddTorrent({type: TorrentTrackerType.Rutracker, id: req.params.rutrackerId});
 				res.json(rutrackerResults);
 			}
 			catch (e) {

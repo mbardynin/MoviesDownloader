@@ -1,7 +1,8 @@
 ﻿import {RutrackerAdapter} from "./RutrackerAdapter"
-import {ITorrentTrackerSearchResult, TorrentTrackerId, TorrentTrackerType, ITorrentTrackerAdapter, ITorrent } from "./Interfaces";
+import {ITorrentTrackerSearchResult,  ITorrentInfo, TorrentTrackerType, ITorrentTrackerAdapter, ITorrentDownloadInfo } from "./Interfaces";
 import {ITorrentTrackersManagerSettings} from "../Config";
 import { ThePirateBayAdapter } from "./ThePirateBayAdapter";
+import { RarbgAdapter } from "./RarbgAdapter";
 
 export class TorrentTrackerManager {
 	private readonly trackers: Map<TorrentTrackerType, ITorrentTrackerAdapter>
@@ -10,23 +11,31 @@ export class TorrentTrackerManager {
 		this.trackers = new Map<TorrentTrackerType, ITorrentTrackerAdapter>();
 		this.trackers.set(TorrentTrackerType.Rutracker, new RutrackerAdapter(settings.rutrackerSettings));
 		this.trackers.set(TorrentTrackerType.ThePirateBay, new ThePirateBayAdapter());
+		this.trackers.set(TorrentTrackerType.Rarbg, new RarbgAdapter());
 	}
 
-	async download(torrentTrackerId: TorrentTrackerId): Promise<ITorrent> {
+	async download(torrentTrackerId: ITorrentInfo): Promise<ITorrentDownloadInfo> {
 		if (!this.trackers.has(torrentTrackerId.type)) {
 			throw `Unsupported torrent tracker type ${torrentTrackerId.type}`;
 		}
 		
 		var tracker = this.trackers.get(torrentTrackerId.type);
-		return await tracker.download(torrentTrackerId.id);
+		return await tracker.download(torrentTrackerId);
 	}
 
 	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {
 		var res: ITorrentTrackerSearchResult[] = [];
+		var containsCyrillicLetters = /[а-яА-ЯЁё]/.test(query);
 		for(let tracker of this.trackers.values())
 		{
+			if(containsCyrillicLetters && !tracker.isRus())
+			{
+				console.info(`search string ${query} contains cyrillic letters. Skip tracker ${tracker.Key}.`)
+				continue;
+			}
+
 			var results = await this.searchInTracker(tracker, query);
-			console.log(`found ${results.length} torrents on tracker ${tracker.Key}`)
+			console.info(`found ${results.length} torrents on tracker ${tracker.Key}`)
 			res = [...res, ...results];
 		}
 
@@ -41,7 +50,7 @@ export class TorrentTrackerManager {
 		}
 		catch(e)
 		{
-			console.log(`Error occured on search request with query ${query} on tracker ${tracker.Key}. Details: ${e}`)
+			console.error(`Error occured on search request with query ${query} on tracker ${tracker.Key}. Details: ${e}`)
 			return [];
 		}
 	}
@@ -56,14 +65,33 @@ export class TorrentTrackerManager {
 		
 		res = this.applyFilterIfNotEmptyResult(res, x => x.isHD);
 		console.log(`left ${res.length} torrents after filtration by category HD Video`);
-		
-		return res.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 8);
-		
+
+		var groupedByTracker = ArrayHelper.groupBy(res, x => x.id.type);
+		var result: ITorrentTrackerSearchResult[] = [];
+		groupedByTracker.forEach(val => result = [...result, ...val.sort((a, b) => b.sizeGb - a.sizeGb).slice(0, 3)]);
+		return result;		
 	}
 
 	private applyFilterIfNotEmptyResult<T>(arr: T[],
 		predicate: (value: T) => boolean): T[] {
 		const filteredResults = arr.filter(predicate);
 		return filteredResults.length === 0 ? arr : filteredResults;
+	}
+}
+
+class ArrayHelper
+{	
+	static groupBy<T, TKey>(list: Array<T>, keySelector: (value: T) => TKey): Map<TKey, T[]> {
+		const map = new Map<TKey, T[]>();
+		list.forEach((item) => {
+			const key = keySelector(item);
+			const collection = map.get(key);
+			if (!collection) {
+				map.set(key, [item]);
+			} else {
+				collection.push(item);
+			}
+		});
+		return map;
 	}
 }

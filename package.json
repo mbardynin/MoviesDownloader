@@ -1,6 +1,7 @@
 {
   "name": "movies-downloader",
   "version": "1.0.0",
+  "license": "MIT",
   "description": "web service and telegram bot for downloading movies from torrent tracker",
   "main": "bin/app.js",
   "repository": {
@@ -19,7 +20,9 @@
     "express": "^4.17.1",
     "filesize-parser": "^1.5.0",
     "googleapis": "^23.0.2",
+    "guid-typescript": "^1.0.9",
     "iconv-lite": "^0.4.24",
+    "rarbg-api": "^1.1.3",
     "request": "^2.88.0",
     "rutracker-api": "^1.1.0",
     "socks5-https-client": "^1.2.1",

@@ -1,5 +1,5 @@
 ﻿import { servicesReporitory } from "./ServiceLocator"
-import {ITorrentTrackerSearchResult, TorrentTrackerId } from "./Trackers/Interfaces";
+import {ITorrentTrackerSearchResult, ITorrentInfo } from "./Trackers/Interfaces";
 
 export class MoviesDownloaderService {
 
@@ -11,9 +11,8 @@ export class MoviesDownloaderService {
 		return await servicesReporitory.torrentTrackerManager.search(query);
 	}
 
-	async AddTorrent(torrentTrackerIdStr: string): Promise<ITransmissionAddTorrentResult> {
-		const torrentTrackerId = TorrentTrackerId.parseFromString(torrentTrackerIdStr);
-		const torrent = await servicesReporitory.torrentTrackerManager.download(torrentTrackerId);
+	async AddTorrent(torrentInfo: ITorrentInfo): Promise<ITransmissionAddTorrentResult> {
+		const torrent = await servicesReporitory.torrentTrackerManager.download(torrentInfo);
 		if(torrent.torrentFileContentBase64)
 		{
 			return await servicesReporitory.transmissionClient.addBase64(torrent.torrentFileContentBase64);
@@ -24,7 +23,7 @@ export class MoviesDownloaderService {
 		}
 		else
 		{
-			throw `unable to download torrent ${torrentTrackerId}`;			
+			throw `unable to download torrent ${torrentInfo}`;			
 		}
 	}
 }
