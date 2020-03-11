@@ -1,6 +1,6 @@
 ﻿var PirateBay = require("thepiratebay");
 var filesizeParser = require("filesize-parser");
-import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentDownloadInfo, ITorrentTrackerAdapter } from "./Interfaces";
+import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentDownloadInfo, ITorrentTrackerAdapter, MovieSearchInfo } from "./Interfaces";
 
 export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 	readonly Key: TorrentTrackerType = TorrentTrackerType.ThePirateBay;
@@ -16,7 +16,7 @@ export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 	// 200 - video
 	//     201 - Movies
 	//     207 - HD - Movies
-	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {	
+	async search(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {	
 		var searchOptions = {
 			category: 'video',
 			orderBy: 'size',
@@ -24,7 +24,7 @@ export class ThePirateBayAdapter implements ITorrentTrackerAdapter {
 			  verified: true
 			}
 		  };	
-		var torrents: Array<any> = await PirateBay.search(query, searchOptions);		
+		var torrents: Array<any> = await PirateBay.search(searchInfo.toString("S"), searchOptions);		
 		return torrents
 			.filter(x => x.subcategory.id == 201 || x.subcategory.id == 207) // moview and HD - movies
 			.map( (x) => {

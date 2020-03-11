@@ -1,5 +1,5 @@
 ﻿var rarbgApi = require('rarbg-api')
-import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentDownloadInfo, ITorrentTrackerAdapter } from "./Interfaces";
+import {ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, ITorrentDownloadInfo, ITorrentTrackerAdapter, MovieSearchInfo } from "./Interfaces";
 
 export class RarbgAdapter implements ITorrentTrackerAdapter {
 	readonly Key: TorrentTrackerType = TorrentTrackerType.Rarbg;
@@ -12,7 +12,7 @@ export class RarbgAdapter implements ITorrentTrackerAdapter {
 		}
 	}
 
-	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {	
+	async search(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {	
 		var searchOptions = {
 			category: rarbgApi.CATEGORY.MOVIES_X264_1080P,
 			limit: 25,
@@ -22,7 +22,7 @@ export class RarbgAdapter implements ITorrentTrackerAdapter {
 			format: 'json_extended',
 			ranked: null
 		  };	
-		var torrents: Array<any> = await rarbgApi.search(query, searchOptions);		
+		var torrents: Array<any> = await rarbgApi.search(searchInfo.toString("s"), searchOptions);		
 		return torrents
 			.map( (x) => {
 				return {

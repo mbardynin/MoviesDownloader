@@ -1,14 +1,17 @@
 ﻿import { servicesReporitory } from "./ServiceLocator"
-import {ITorrentTrackerSearchResult, ITorrentInfo } from "./Trackers/Interfaces";
+import {ITorrentTrackerSearchResult, ITorrentInfo, MovieSearchInfo } from "./Trackers/Interfaces";
+import { IKinopoiskMovieInfo } from "./MoviesInfoSources/KinopoiskWrapper";
 
 export class MoviesDownloaderService {
 
-	async GetApplicableTorrents(kinopoiskId: number): Promise<ITorrentTrackerSearchResult[]> {
+	async GetSearchResult(kinopoiskId: number): Promise<IKinopoiskMovieInfo> {
 		console.info(`Requested film with id ${kinopoiskId}`);
-		const film = await servicesReporitory.kinopoisk.getById(kinopoiskId);
-		const query = `${film.title} ${film.year} ${film.director}`;
-		console.dir(`Rutracker search string: '${query}'`);
-		return await servicesReporitory.torrentTrackerManager.search(query);
+		return await servicesReporitory.kinopoisk.getById(kinopoiskId);
+	}
+
+	async GetApplicableTorrents(movieInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {
+		console.dir(`Search string: '${movieInfo.toString("s")}'`);
+		return await servicesReporitory.torrentTrackerManager.search(movieInfo);
 	}
 
 	async AddTorrent(torrentInfo: ITorrentInfo): Promise<ITransmissionAddTorrentResult> {

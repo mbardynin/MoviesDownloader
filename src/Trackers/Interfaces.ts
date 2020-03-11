@@ -11,7 +11,6 @@ export interface ITorrentTrackerSearchResult {
 	category: string,
 	isHD: boolean
 	title: string,
-	// in GB
 	sizeGb: number,
 	seeds: number,
 	url: string;
@@ -28,6 +27,22 @@ export interface ITorrentInfo {
 	readonly magnetLink?: string
 }
 
+export class MovieSearchInfo {
+	title: string;
+	year: number;
+	isTvShow: boolean;
+	selectedSeason?: number | null;
+
+	toString(seasonStr: string) : string
+	{
+		let baseStr = `${this.title} ${this.year}`;
+		if(this.isTvShow && this.selectedSeason)
+			return `${baseStr} ${seasonStr} ${this.selectedSeason}`;
+		else
+			return baseStr;
+	}
+}
+
 export interface ITorrentTrackerAdapter
 {
 	readonly Key: TorrentTrackerType;
@@ -36,5 +51,5 @@ export interface ITorrentTrackerAdapter
 
 	download(id: ITorrentInfo): Promise<ITorrentDownloadInfo>;
 
-	search(query: string): Promise<ITorrentTrackerSearchResult[]>;
+	search(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]>;
 } 

@@ -1,5 +1,5 @@
 ﻿import {RutrackerAdapter} from "./RutrackerAdapter"
-import {ITorrentTrackerSearchResult,  ITorrentInfo, TorrentTrackerType, ITorrentTrackerAdapter, ITorrentDownloadInfo } from "./Interfaces";
+import {ITorrentTrackerSearchResult,  ITorrentInfo, TorrentTrackerType, ITorrentTrackerAdapter, ITorrentDownloadInfo, MovieSearchInfo } from "./Interfaces";
 import {ITorrentTrackersManagerSettings} from "../Config";
 import { ThePirateBayAdapter } from "./ThePirateBayAdapter";
 import { RarbgAdapter } from "./RarbgAdapter";
@@ -23,18 +23,18 @@ export class TorrentTrackerManager {
 		return await tracker.download(torrentTrackerId);
 	}
 
-	async search(query: string): Promise<ITorrentTrackerSearchResult[]> {
+	async search(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {
 		var res: ITorrentTrackerSearchResult[] = [];
-		var containsCyrillicLetters = /[а-яА-ЯЁё]/.test(query);
+		var containsCyrillicLetters = /[а-яА-ЯЁё]/.test(searchInfo.title);
 		for(let tracker of this.trackers.values())
 		{
 			if(containsCyrillicLetters && !tracker.isRus())
 			{
-				console.info(`search string ${query} contains cyrillic letters. Skip tracker ${tracker.Key}.`)
+				console.info(`search string contains cyrillic letters. Skip tracker ${tracker.Key}.`)
 				continue;
 			}
 
-			var results = await this.searchInTracker(tracker, query);
+			var results = await this.searchInTracker(tracker, searchInfo);
 			console.info(`found ${results.length} torrents on tracker ${tracker.Key}`)
 			res = [...res, ...results];
 		}
@@ -42,15 +42,15 @@ export class TorrentTrackerManager {
 		return this.applyFilters(res);
 	}	
 
-	private async searchInTracker(tracker: ITorrentTrackerAdapter, query: string): Promise<ITorrentTrackerSearchResult[]>
+	private async searchInTracker(tracker: ITorrentTrackerAdapter, searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]>
 	{
 		try
 		{
-			return await tracker.search(query);
+			return await tracker.search(searchInfo);
 		}
 		catch(e)
 		{
-			console.error(`Error occured on search request with query ${query} on tracker ${tracker.Key}. Details: ${e}`)
+			console.error(`Error occured on search request with query ${searchInfo.toString("s")} on tracker ${tracker.Key}. Details: ${e}`)
 			return [];
 		}
 	}
