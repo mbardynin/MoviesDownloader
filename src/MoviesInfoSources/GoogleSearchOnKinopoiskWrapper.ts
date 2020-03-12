@@ -41,7 +41,7 @@ export class GoogleSearchOnKinopoiskWrapper {
             alternativeTitle: item.pagemap.movie[0].alternativeheadline,
             year: new Date(item.pagemap.movie[0].datecreated).getFullYear(),
             isTvShow: regRes != null,
-            countOfSeasons: parseInt(regRes[1])
+            countOfSeasons: regRes ? parseInt(regRes[1]) : null
           }
           resolve(result);
         }

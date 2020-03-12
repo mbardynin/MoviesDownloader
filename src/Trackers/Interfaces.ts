@@ -33,14 +33,22 @@ export class MovieSearchInfo {
 	isTvShow: boolean;
 	selectedSeason?: number | null;
 
-	toString(seasonStr: string) : string
+	toString(seasonStr: string, seasonDigits : number = 1) : string
 	{
 		let baseStr = `${this.title} ${this.year}`;
 		if(this.isTvShow && this.selectedSeason)
-			return `${baseStr} ${seasonStr} ${this.selectedSeason}`;
+		{
+			var season = this.zeroPad(this.selectedSeason, seasonDigits);
+			return `${baseStr} ${seasonStr}${season}`;
+		}
 		else
 			return baseStr;
 	}
+
+	private zeroPad(num : number, places: number) {
+		var zero = places - num.toString().length + 1;
+		return Array(+(zero > 0 && zero)).join("0") + num;
+	  }
 }
 
 export interface ITorrentTrackerAdapter

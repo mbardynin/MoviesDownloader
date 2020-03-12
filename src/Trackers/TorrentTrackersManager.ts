@@ -39,7 +39,7 @@ export class TorrentTrackerManager {
 			res = [...res, ...results];
 		}
 
-		return this.applyFilters(res);
+		return this.applyFilters(res, searchInfo.isTvShow);
 	}	
 
 	private async searchInTracker(tracker: ITorrentTrackerAdapter, searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]>
@@ -55,12 +55,16 @@ export class TorrentTrackerManager {
 		}
 	}
 
-	private applyFilters(results: ITorrentTrackerSearchResult[]): ITorrentTrackerSearchResult[]
+	private applyFilters(results: ITorrentTrackerSearchResult[], isTvShow : boolean): ITorrentTrackerSearchResult[]
 	{
 		var res = results.filter(x => x.seeds >= 1);
 		console.log(`left ${res.length} torrents after filtration by seeds`);
 
-		var res = this.applyFilterIfNotEmptyResult(results, x => x.sizeGb <= 25 && x.sizeGb >= 7);
+		if(isTvShow)
+			res = this.applyFilterIfNotEmptyResult(results, x => x.sizeGb <= 60 && x.sizeGb >= 15);
+		else
+			res = this.applyFilterIfNotEmptyResult(results, x => x.sizeGb <= 25 && x.sizeGb >= 7);
+		
 		console.log(`left ${res.length} torrents after filtration by size`);
 		
 		res = this.applyFilterIfNotEmptyResult(res, x => x.isHD);

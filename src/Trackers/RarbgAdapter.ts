@@ -14,7 +14,7 @@ export class RarbgAdapter implements ITorrentTrackerAdapter {
 
 	async search(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {	
 		var searchOptions = {
-			category: rarbgApi.CATEGORY.MOVIES_X264_1080P,
+			category: searchInfo.isTvShow ? rarbgApi.CATEGORY.TV : rarbgApi.CATEGORY.MOVIES_X264_1080P,
 			limit: 25,
 			sort: 'size',
 			min_seeders: 1,
@@ -22,7 +22,7 @@ export class RarbgAdapter implements ITorrentTrackerAdapter {
 			format: 'json_extended',
 			ranked: null
 		  };	
-		var torrents: Array<any> = await rarbgApi.search(searchInfo.toString("s"), searchOptions);		
+		var torrents: Array<any> = await rarbgApi.search(searchInfo.toString("s", 2), searchOptions);		
 		return torrents
 			.map( (x) => {
 				return {

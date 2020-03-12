@@ -23,7 +23,7 @@ export class RutrackerAdapter implements ITorrentTrackerAdapter {
 	}
 
 	async search(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {		
-		var torrents = await this.rutracker.search({ query: searchInfo.toString("сезон"), sort: 'size' });		
+		var torrents = await this.rutracker.search({ query: searchInfo.toString("сезон "), sort: 'size' });		
 		let convertedResults: ITorrentTrackerSearchResult[] = torrents.map( (x) => {
 			return {
 				id: {type:TorrentTrackerType.Rutracker, id: x.id},
