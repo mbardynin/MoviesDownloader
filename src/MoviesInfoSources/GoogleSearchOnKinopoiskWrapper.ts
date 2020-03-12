@@ -34,10 +34,14 @@ export class GoogleSearchOnKinopoiskWrapper {
 
         var item = resp.items.find(x => isFilmPage(x, kinopoiskId));
         if (item) {
+          let regexp = /\(\d*, сериал, (\d*) сезонов\)/m
+          let regRes = regexp.exec(item.title);
           let result: IMovieInfo = {
             title: item.pagemap.movie[0].name,
             alternativeTitle: item.pagemap.movie[0].alternativeheadline,
             year: new Date(item.pagemap.movie[0].datecreated).getFullYear(),
+            isTvShow: regRes != null,
+            countOfSeasons: regRes ? parseInt(regRes[1]) : null
           }
           resolve(result);
         }
@@ -63,4 +67,6 @@ export interface IMovieInfo {
   title: string,
   alternativeTitle: string,
   year: number,
+  isTvShow: boolean,
+  countOfSeasons: number
 }

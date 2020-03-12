@@ -19,7 +19,9 @@ export class KinopoiskWrapper {
 			let mappedFilmInfo: IKinopoiskMovieInfo = {
 				title: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(movieInfo.alternativeTitle) ? movieInfo.alternativeTitle : movieInfo.title,
 				year: movieInfo.year,
-				director: ""
+				director: "",
+				isTvShow: movieInfo.isTvShow,
+				countOfSeasons: movieInfo.countOfSeasons
 				//director: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(film.director[0]) ? film.director[0] : ""
 			};
 			return mappedFilmInfo;
@@ -38,7 +40,9 @@ export class KinopoiskWrapper {
 					let mappedFilmInfo: IKinopoiskMovieInfo = {
 						title: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(film.alternativeTitle) ? film.alternativeTitle : film.title,
 						year: film.year,
-						director: ""
+						director: "",
+						isTvShow: false,
+						countOfSeasons: NaN
 						//director: this.isStringNotEmptyAndHasJustLatinAndCyrilicChars(film.director[0]) ? film.director[0] : ""
 					}
 					resolve(mappedFilmInfo);					
@@ -67,5 +71,7 @@ export class KinopoiskWrapper {
 export interface IKinopoiskMovieInfo {
 	title: string,
 	year: number,
-	director: string;
+	director: string,
+	isTvShow: boolean,
+	countOfSeasons: number
 }

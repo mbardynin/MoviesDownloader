@@ -2,9 +2,10 @@
 import { ExtraEditMessage } from "telegraf/typings/telegram-types";
 import { servicesReporitory } from "./ServiceLocator"
 import { ITelegramBotSettings } from "./Config";
-import { ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo } from "./Trackers/Interfaces";
+import { ITorrentTrackerSearchResult, TorrentTrackerType, ITorrentInfo, MovieSearchInfo } from "./Trackers/Interfaces";
 import SocksAgent from 'socks5-https-client/lib/Agent';
 import { Guid } from "guid-typescript";
+import { IKinopoiskMovieInfo } from "./MoviesInfoSources/KinopoiskWrapper";
 
 export class MoviesDownloaderTelegramBot {
 	private readonly options: ITelegramBotSettings;
@@ -93,6 +94,9 @@ export class MoviesDownloaderTelegramBot {
 					case BotCallbackActions.RemoveTorrent:
 						await this.removeTorrentCalback(ctx.callbackQuery.id, chatId, msg, callbackData.data);
 						return;
+					case BotCallbackActions.SelectSeason:
+						await this.selectSeasonCalback(ctx, callbackData.data as MovieSearchInfo);
+						return;
 					default:
 						console.warn(`Unknown callback action registered: '${callbackData.toString()}'`);
 				}
@@ -124,31 +128,45 @@ export class MoviesDownloaderTelegramBot {
 		const chatId = ctx.chat.id;
 		// check permissions
 		if (!this.isAllowedChat(chatId)) {
-			ctx.reply("You have not permissions for downloading movies.");
+			await ctx.reply("You have not permissions for downloading movies.");
 			return;
 		}
 
+		var movieInfo = await this.getMovieInfo(ctx);
+		if(!movieInfo)
+			return;
+
+		await this.searchTorrents(ctx, movieInfo)
+	}
+
+	async getMovieInfo(ctx: ContextMessageUpdate) : Promise<MovieSearchInfo> {
 		const filmId = Number.parseInt(ctx.match[1]);	
 		try {
-			const trackerResults = await servicesReporitory.moviesDownloaderService.GetApplicableTorrents(filmId);
-			if (trackerResults.length === 0) {
-				ctx.reply("Appropriate torrents on torrent trackers don't found.");
+			const searchResult = await servicesReporitory.moviesDownloaderService.GetSearchResult(filmId);
+			if(searchResult.isTvShow && searchResult.countOfSeasons > 1)
+			{
+				const keyboard = this.createSelectSeasonMessageKeyboard(searchResult);
+				const opts = this.createSendMessageOptions(keyboard);
+				await ctx.reply('Choose season', opts);
+				// ask user about particular season
 				return;
 			}
 
-			const message = this.createDownloadMessage(trackerResults);
-			const keyboard = this.createDownloadMessageKeyboard(trackerResults);
-			const opts = this.createSendMessageOptions(keyboard);
-			ctx.reply(message, opts);
-			
+			return this.convertMovieInfo(searchResult, 1);			
 		} catch (e) {
-			ctx.reply(`Unable to find appropriate torrents. Reason: ${e.message}`);
+			await ctx.reply(`Unable to find appropriate torrents. Reason: ${e.message}`);
+			return null;
 		} 
 	}
 	
 	private cancelCalback(callbackId, chatId, message) {
 		this.editMessage(chatId, message.message_id, "Action is canceled.")
 	}
+
+	private async selectSeasonCalback(ctx: ContextMessageUpdate, searchInfo: MovieSearchInfo) {
+		ctx.deleteMessage();
+		await this.searchTorrents(ctx, searchInfo)
+	}	
 
 	private async downloadCalback(callbackId, chatId, message, torrentInfo: ITorrentInfo) {
 		try {
@@ -170,6 +188,34 @@ export class MoviesDownloaderTelegramBot {
 		}
 	}
 
+	private async searchTorrents(ctx: ContextMessageUpdate, movieInfo: MovieSearchInfo)
+	{
+		try {
+			const trackerResults = await servicesReporitory.moviesDownloaderService.GetApplicableTorrents(movieInfo);
+			if (trackerResults.length === 0) {
+				await ctx.reply("Can't find appropriate torrents.");
+				return;
+			}
+
+			const message = this.createDownloadMessage(trackerResults);
+			const keyboard = this.createDownloadMessageKeyboard(trackerResults);
+			const opts = this.createSendMessageOptions(keyboard);
+			await ctx.reply(message, opts);
+			
+		} catch (e) {
+			await ctx.reply(`Unable to find appropriate torrents. Reason: ${e.message}`);
+		} 
+	} 
+
+	private convertMovieInfo(searchResult: IKinopoiskMovieInfo, season: number): MovieSearchInfo {
+		const movieInfo = new MovieSearchInfo();
+		movieInfo.year = searchResult.year;
+		movieInfo.title = searchResult.title;
+		movieInfo.isTvShow = searchResult.isTvShow;
+		movieInfo.selectedSeason = season;
+		return movieInfo;
+	}
+
 	private createDownloadMessage(rutrackerResults: ITorrentTrackerSearchResult[]): string {
 		let message = "Please select torrent for downloading:";
 		for (let x of rutrackerResults) {
@@ -181,6 +227,11 @@ export class MoviesDownloaderTelegramBot {
 
 	private createDownloadMessageKeyboard(rutrackerResults: ITorrentTrackerSearchResult[]) : Buttons[][] {
 		return rutrackerResults.map(x => this.createKeyboardButton(`${TorrentTrackerType[x.id.type]} [${x.sizeGb}GB]`, CallbackData.create(BotCallbackActions.Download, x.id)));
+	}
+
+	private createSelectSeasonMessageKeyboard(movieInfo: IKinopoiskMovieInfo) : Buttons[][] {
+		var options = Array.from(Array(movieInfo.countOfSeasons), (_, i) => i+1);
+		return options.map(x => this.createKeyboardButton(x.toString(), CallbackData.create(BotCallbackActions.SelectSeason, this.convertMovieInfo(movieInfo, x))));
 	}
 
 	private createKeyboardButton(text: string, callbackData: CallbackData) : CallbackButton[] {
@@ -267,5 +318,6 @@ class CallbackData {
 enum BotCallbackActions {
 	Cancel = 0,
 	Download = 1,
-	RemoveTorrent = 2
+	RemoveTorrent = 2,
+	SelectSeason = 3
 }
