@@ -26,7 +26,7 @@
     "request": "^2.88.0",
     "rutracker-api": "^1.1.0",
     "socks5-https-client": "^1.2.1",
-    "telegraf": "^3.32.0",
+    "telegraf": "^3.36.0",
     "thepiratebay": "^1.4.7",
     "transmission-client": "^1.0.0"
   },
