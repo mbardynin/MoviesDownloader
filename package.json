@@ -26,7 +26,7 @@
     "request": "^2.88.0",
     "rutracker-api": "^1.1.0",
     "socks5-https-client": "^1.2.1",
-    "telegraf": "^3.32.0",
+    "telegraf": "^3.36.0",
     "thepiratebay": "^1.4.7",
     "transmission-client": "^1.0.0"
   },
@@ -34,9 +34,9 @@
     "@types/node": "^7.10.7",
     "gulp": "^4.0.2",
     "gulp-zip": "^4.2.0",
-    "typescript": "^3.6.3"
+    "typescript": "^3.8.3"
   },
   "engines": {
-    "node": "7.7.4"
+    "node": "12.16.1"
   }
 }
