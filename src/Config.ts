@@ -22,7 +22,7 @@ export interface IKinopoiskWrapperSettings {
 }
 
 export interface IGoogleSearchOnKinopoiskSettings {
-	apiKey: ILoginPassword;
+	apiKey: string;
 	customSearchId: string;
 }
 

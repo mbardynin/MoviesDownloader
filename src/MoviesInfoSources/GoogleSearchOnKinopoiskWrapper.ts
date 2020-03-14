@@ -1,12 +1,15 @@
-var google = require('googleapis');
-var customsearch = google.customsearch("v1");
-
+import {GoogleApis} from "googleapis"
 import { IGoogleSearchOnKinopoiskSettings } from "./../Config"
 
 export class GoogleSearchOnKinopoiskWrapper {
   private options: IGoogleSearchOnKinopoiskSettings;
 
-  constructor(options: IGoogleSearchOnKinopoiskSettings) { this.options = options; }
+  private google: GoogleApis;
+
+  constructor(options: IGoogleSearchOnKinopoiskSettings) { 
+    this.options = options;
+    this.google = new GoogleApis();
+  }
 
   async getMovieInfoById(kinopoiskId: number): Promise<IMovieInfo> {
     try {
@@ -15,44 +18,39 @@ export class GoogleSearchOnKinopoiskWrapper {
       console.error(e);
       return null;
     }
-  }
+  }  
 
   private async getFilmInfoFromGetmovie(kinopoiskId: number): Promise<IMovieInfo> {
-    return new Promise<IMovieInfo>((resolve, reject) => {
-      customsearch.cse.list({ cx: this.options.customSearchId, q: kinopoiskId, auth: this.options.apiKey }, function (err, resp) {
-        if (err) {
-          reject(err);
-          return;
-        }
+    var resp = await this.google.customsearch("v1").cse.list({         
+      cx: this.options.customSearchId, 
+      q: kinopoiskId.toString(), 
+      auth: this.options.apiKey });
 
-        if(resp == null)
-        {
-          console.log('No results found in google search');
-          resolve(null);
-          return;
-        }
+    if(resp == null)
+    {
+      console.log('No results found in google search');
+      return null;
+      return;
+    }
 
-        var item = resp.items.find(x => isFilmPage(x, kinopoiskId));
-        if (item) {
-          let regexp = /\(\d*, сериал, (\d*) сезонов\)/m
-          let regRes = regexp.exec(item.title);
-          let result: IMovieInfo = {
-            title: item.pagemap.movie[0].name,
-            alternativeTitle: item.pagemap.movie[0].alternativeheadline,
-            year: new Date(item.pagemap.movie[0].datecreated).getFullYear(),
-            isTvShow: regRes != null,
-            countOfSeasons: regRes ? parseInt(regRes[1]) : null
-          }
-          resolve(result);
-        }
-        else {
-          console.log('No results found in google search');
-          resolve(null);
-        }
-      });
-    });
+    var item = resp.data.items.find(x => isFilmPage(x, kinopoiskId));
+    if (item) {
+      let regexp = /\(\d*, сериал, (\d*) сезонов\)/m
+      let regRes = regexp.exec(item.title);
+      let result: IMovieInfo = {
+        title: item.pagemap.movie[0].name,
+        alternativeTitle: item.pagemap.movie[0].alternativeheadline,
+        year: new Date(item.pagemap.movie[0].datecreated).getFullYear(),
+        isTvShow: regRes != null,
+        countOfSeasons: regRes ? parseInt(regRes[1]) : null
+      }
+      return result;
+    }
+    else {
+      console.log('No results found in google search');
+      return null;
+    }      
   }
-
 
 }
 
