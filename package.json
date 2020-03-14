@@ -27,7 +27,7 @@
     "transmission-client": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^7.10.7",
+    "@types/node": "^13.9.1",
     "gulp": "^4.0.2",
     "gulp-zip": "^4.2.0",
     "typescript": "^3.8.3"
