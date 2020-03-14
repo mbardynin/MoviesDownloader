@@ -11,6 +11,3 @@ Workflow for bot:
 4. When downloading is completed, bot will send the message about it.
 
 call **tsc** for compile Typescript files.
-
-wait for fix in rutracker-api:
-https://github.com/nikityy/rutracker-api/pull/14/commits/d9d856fd199701aac09a9a2b06ff94d0c69902ad
