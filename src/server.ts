@@ -2,7 +2,6 @@
 import { TorrentTrackerType } from "./Trackers/Interfaces";
 let express = require("express");
 let app = express();
-let bodyParser = require('body-parser');
 
 export class Server {
 	startListening() {
