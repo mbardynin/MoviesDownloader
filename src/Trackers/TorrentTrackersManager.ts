@@ -24,29 +24,34 @@ export class TorrentTrackerManager {
 	}
 
 	async search(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {
-		var res: ITorrentTrackerSearchResult[] = [];
-		var containsCyrillicLetters = /[а-яА-ЯЁё]/.test(searchInfo.title);
+		var res = await this.getSearchResults(searchInfo);
+		return this.applyFilters(res, searchInfo.isTvShow);
+	}
+
+	private async getSearchResults(searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]> {
+		var tasks: Promise<ITorrentTrackerSearchResult[]>[] = [];
 		for(let tracker of this.trackers.values())
 		{
-			if(containsCyrillicLetters && !tracker.isRus())
-			{
-				console.info(`search string contains cyrillic letters. Skip tracker ${tracker.Key}.`)
-				continue;
-			}
-
-			var results = await this.searchInTracker(tracker, searchInfo);
-			console.info(`found ${results.length} torrents on tracker ${tracker.Key}`)
-			res = [...res, ...results];
+			tasks = [...tasks, this.searchInTracker(tracker, searchInfo)];
 		}
 
-		return this.applyFilters(res, searchInfo.isTvShow);
+		return (await Promise.all(tasks)).reduce((a,b) => a.concat(b));
 	}	
 
 	private async searchInTracker(tracker: ITorrentTrackerAdapter, searchInfo: MovieSearchInfo): Promise<ITorrentTrackerSearchResult[]>
 	{
+		var containsCyrillicLetters = /[а-яА-ЯЁё]/.test(searchInfo.title);
+		if(containsCyrillicLetters && !tracker.isRus())
+		{
+			console.info(`search string contains cyrillic letters. Skip tracker ${tracker.Key}.`)
+			return [];
+		}
+
 		try
 		{
-			return await tracker.search(searchInfo);
+			var results = await tracker.search(searchInfo);			
+			console.info(`found ${results.length} torrents on tracker ${tracker.Key}`)
+			return results;
 		}
 		catch(e)
 		{
