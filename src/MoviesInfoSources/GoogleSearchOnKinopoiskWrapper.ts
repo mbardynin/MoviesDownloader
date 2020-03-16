@@ -34,7 +34,7 @@ export class GoogleSearchOnKinopoiskWrapper {
 
     var item = resp.data.items.find(x => isFilmPage(x, kinopoiskId));
     if (item) {
-      let regexp = /\(\d*, сериал, (\d*) сезонов\)/m
+      let regexp = /сериал, (\d*) сезон/m
       let regRes = regexp.exec(item.title);
       let result: IMovieInfo = {
         title: item.pagemap.movie[0].name,
