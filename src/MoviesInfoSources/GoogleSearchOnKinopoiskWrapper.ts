@@ -13,14 +13,14 @@ export class GoogleSearchOnKinopoiskWrapper {
 
   async getMovieInfoById(kinopoiskId: number): Promise<IMovieInfo> {
     try {
-      return await this.getFilmInfoFromGetmovie(kinopoiskId);
+      return await this.getFilmInfoFromGoogle(kinopoiskId);
     } catch (e) {
-      console.error(e);
+      console.error(`Unable to get movie ${kinopoiskId} info from google.`, e);
       return null;
     }
   }  
 
-  private async getFilmInfoFromGetmovie(kinopoiskId: number): Promise<IMovieInfo> {
+  private async getFilmInfoFromGoogle(kinopoiskId: number): Promise<IMovieInfo> {
     var resp = await this.google.customsearch("v1").cse.list({         
       cx: this.options.customSearchId, 
       q: kinopoiskId.toString(), 
@@ -30,7 +30,6 @@ export class GoogleSearchOnKinopoiskWrapper {
     {
       console.log('No results found in google search');
       return null;
-      return;
     }
 
     var item = resp.data.items.find(x => isFilmPage(x, kinopoiskId));

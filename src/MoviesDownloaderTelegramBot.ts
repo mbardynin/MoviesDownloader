@@ -102,13 +102,13 @@ export class MoviesDownloaderTelegramBot {
 				}
 			}
 			catch(e){
-				console.error(`Error occured on handling callback ${ctx.callbackQuery.data}. Details: ${e}`);
+				console.error(`Error occured on handling callback ${ctx.callbackQuery.data}.`, e);
 				ctx.answerCbQuery(e);
 			}
 		});
 		
 		this.bot.catch((err) => {
-			console.log('Ooops', err)
+			console.error('Ooops', err)
 		})
 		
 		if (this.options.useWebHooks) 
